@@ -14,7 +14,7 @@ namespace Communications.Appi
     /// <summary>
     /// Представление АППИ
     /// </summary>
-    public abstract class AppiDev
+    public abstract class AppiDev : IDisposable
     {
         /// <summary>
         /// GUID устройства
@@ -28,6 +28,21 @@ namespace Communications.Appi
         protected abstract Byte[] ReadBuffer();
         protected abstract void WriteBuffer(Byte[] Buffer);
 
+        public Dictionary<AppiLine, AppiCanPort> Ports { get; private set; }
+
+        public AppiDev()
+        {
+            Ports = new Dictionary<AppiLine, AppiCanPort>()
+            {
+                { AppiLine.Can1, new AppiCanPort(AppiLine.Can1) },
+                { AppiLine.Can2, new AppiCanPort(AppiLine.Can2) }
+            };
+        }
+        public virtual void Dispose()
+        {
+            if (IsListening) StopListening();
+        }
+
         /// <summary>
         /// Считывает текущее состояние и сообщения из АППИ
         /// </summary>
@@ -36,13 +51,17 @@ namespace Communications.Appi
         {
             var buff = ReadBuffer();
 
+            if (buff.Length != BufferSize) return AppiMessages.Empty;
+
             var MessagesInA = buff[6];
-            var MessagesInB = buff[3];
+            var MessagesInB = buff[2];
 
             var messages = new AppiMessages(
                     ParseBuffer(buff, 24, MessagesInA).ToList(),
-                    ParseBuffer(buff, 524, MessagesInA).ToList()
+                    ParseBuffer(buff, 524, MessagesInB).ToList()
                     );
+
+            OnMessagesRecieved(messages);
 
             return messages;
         }
@@ -91,6 +110,68 @@ namespace Communications.Appi
         public void SendMessage(CanMessage Message, AppiLine Line)
         {
             SendMessages(new List<CanMessage>() { Message }, Line);
+        }
+
+        public event AppiReceiveEventHandler AppiMessagesRecieved;
+
+        private void OnMessagesRecieved(AppiMessages mes)
+        {
+            if (AppiMessagesRecieved != null) AppiMessagesRecieved(this, new AppiMessageRecieveEventArgs(mes));
+
+            Ports[AppiLine.Can1].OnMessagesRecieved(mes.ChannelA);
+            Ports[AppiLine.Can2].OnMessagesRecieved(mes.ChannelB);
+        }
+
+        /// <summary>
+        /// Признак действия режима прослушивания линии
+        /// </summary>
+        public bool IsListening { get; private set; }
+        private System.Threading.Thread ListeningThread;
+        /// <summary>
+        /// Начать прослушивание линии
+        /// </summary>
+        /// <remarks>Запускает отдельный поток для прослушивания линии</remarks>
+        public void BeginListen()
+        {
+            if (!IsListening)
+            {
+                ListeningThread = new System.Threading.Thread(ListeningLoop);
+                IsListening = true;
+                ListeningThread.Start();
+            }
+        }
+        /// <summary>
+        /// Петля прослушивания линии
+        /// </summary>
+        private void ListeningLoop()
+        {
+            while (IsListening)
+            {
+                this.ReadMessages();
+            }
+        }
+        /// <summary>
+        /// Остановить прослушивание линии
+        /// </summary>
+        public void StopListening()
+        {
+            if (IsListening)
+            {
+                IsListening = false;
+                ListeningThread.Abort();
+            }
+        }
+    }
+
+
+    public delegate void AppiReceiveEventHandler(object sender, AppiMessageRecieveEventArgs e);
+    public class AppiMessageRecieveEventArgs : EventArgs
+    {
+        public AppiMessages Messages { get; set; }
+
+        public AppiMessageRecieveEventArgs(AppiMessages Messages)
+        {
+            this.Messages = Messages;
         }
     }
 }

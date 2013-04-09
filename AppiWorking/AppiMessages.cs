@@ -21,8 +21,13 @@ namespace Communications.Appi
 
         public AppiMessages(IList<CanMessage> ChannelA, IList<CanMessage> ChannelB)
         {
-            this.ChannelA = ChannelB;
+            this.ChannelA = ChannelA;
             this.ChannelB = ChannelB;
+        }
+
+        public static AppiMessages Empty
+        {
+            get { return new AppiMessages(new List<CanMessage>(), new List<CanMessage>()); }
         }
     }
 }

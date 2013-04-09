@@ -6,7 +6,7 @@ using MadWizard.WinUSBNet;
 
 namespace Communications.Appi.Winusb
 {
-    public class WinusbAppiDev : AppiDev, IDisposable
+    public class WinusbAppiDev : AppiDev
     {   
         private USBDevice Device { get; set; }
         private USBPipe ReadPipe { get; set; }
@@ -19,6 +19,7 @@ namespace Communications.Appi.Winusb
 
 
         internal WinusbAppiDev(USBDeviceInfo di)
+            : base()
         {
             Device = new USBDevice(di);
             ReadPipe = Device.Pipes.First(p => p.IsIn);
@@ -37,8 +38,9 @@ namespace Communications.Appi.Winusb
             WritePipe.Write(Buffer);
         }
 
-        public void Dispose()
+        public override void Dispose()
         {
+            base.Dispose();
             Device.Dispose();
         }
     }
