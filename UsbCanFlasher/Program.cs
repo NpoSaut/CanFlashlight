@@ -5,6 +5,7 @@ using System.Text;
 using MadWizard.WinUSBNet;
 using System.IO;
 using Communications.Appi;
+using Communications.Can;
 
 namespace UsbCanFlasher
 {
@@ -15,8 +16,8 @@ namespace UsbCanFlasher
             var ds = Communications.Appi.Winusb.WinusbAppiDev.GetDevices().First();
             using (var d = ds.OpenDevice())
             {
-                foreach (var p in d.Ports)
-                    p.Value.Recieved += new CanMessagesReceiveEventHandler(Value_Recieved);
+                foreach (var p in d.Ports.Values)
+                    p.Recieved += new CanFramesReceiveEventHandler(Value_Recieved);
 
                 d.BeginListen();
 
@@ -27,18 +28,18 @@ namespace UsbCanFlasher
                 {
                     Byte[] buff = new Byte[8];
                     r.NextBytes(buff);
-                    d.SendMessage(CanMessage.NewWithDescriptor(0x0c08, buff), AppiLine.Can1);
+                    d.Ports[AppiLine.Can1].Send(CanFrame.NewWithDescriptor(0x0c08, buff));
                 }
             }
         }
 
-        static void Value_Recieved(object sender, CanMessagesReceiveEventArgs e)
+        static void Value_Recieved(object sender, CanFramesReceiveEventArgs e)
         {
-            foreach (var m in e.Messages)
+            foreach (var m in e.Frames)
             {
                 Console.BackgroundColor = ConsoleColor.Gray;
                 Console.ForegroundColor = ConsoleColor.Black;
-                Console.Write(e.Line.ToString().ToUpper());
+                Console.Write((sender as CanPort).Name.ToUpper());
                 Console.ResetColor();
                 Console.Write(" ");
 

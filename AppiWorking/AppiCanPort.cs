@@ -2,35 +2,31 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Communications.Can;
 
 namespace Communications.Appi
 {
-    public class AppiCanPort
+    public class AppiCanPort : CanPort
     {
         public AppiLine Line { get; private set; }
-        public event CanMessagesReceiveEventHandler Recieved;
 
-        public AppiCanPort(AppiLine Line)
+        private AppiDev Device { get; set; }
+
+        internal AppiCanPort(AppiDev Device, AppiLine Line)
+            : base(Line.ToString())
         {
+            this.Device = Device;
             this.Line = Line;
         }
 
-        internal void OnMessagesRecieved(IList<CanMessage> Messages)
+        public override void Send(IList<CanFrame> Frames)
         {
-            if (Messages.Any() && Recieved != null) Recieved(this, new CanMessagesReceiveEventArgs(Messages, Line));
+            Device.SendFrames(Frames, Line);
         }
-    }
 
-    public delegate void CanMessagesReceiveEventHandler(object sender, CanMessagesReceiveEventArgs e);
-    public class CanMessagesReceiveEventArgs : EventArgs
-    {
-        public IList<CanMessage> Messages { get; set; }
-        public AppiLine Line { get; private set; }
-
-        public CanMessagesReceiveEventArgs(IList<CanMessage> Messages, AppiLine Line)
+        internal void OnAppiFramesRecieved(IList<CanFrame> Frames)
         {
-            this.Messages = Messages;
-            this.Line = Line;
+            OnFramesRecieved(Frames);
         }
     }
 }

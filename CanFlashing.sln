@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppiWorking", "AppiWorking\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppiDrvWinusb", "AppiDrvWinusb\AppiDrvWinusb.csproj", "{82EB0C22-FADE-497A-BE09-FFA3624D4E63}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CanLine", "CanLine\CanLine.csproj", "{5BD64D61-F283-4833-B5A0-25EBE435AC89}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -47,6 +49,16 @@ Global
 		{82EB0C22-FADE-497A-BE09-FFA3624D4E63}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{82EB0C22-FADE-497A-BE09-FFA3624D4E63}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{82EB0C22-FADE-497A-BE09-FFA3624D4E63}.Release|x86.ActiveCfg = Release|Any CPU
+		{5BD64D61-F283-4833-B5A0-25EBE435AC89}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5BD64D61-F283-4833-B5A0-25EBE435AC89}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5BD64D61-F283-4833-B5A0-25EBE435AC89}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{5BD64D61-F283-4833-B5A0-25EBE435AC89}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{5BD64D61-F283-4833-B5A0-25EBE435AC89}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{5BD64D61-F283-4833-B5A0-25EBE435AC89}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5BD64D61-F283-4833-B5A0-25EBE435AC89}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5BD64D61-F283-4833-B5A0-25EBE435AC89}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{5BD64D61-F283-4833-B5A0-25EBE435AC89}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{5BD64D61-F283-4833-B5A0-25EBE435AC89}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

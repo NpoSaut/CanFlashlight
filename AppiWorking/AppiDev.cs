@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Communications.Can;
 
 namespace Communications.Appi
 {
@@ -34,8 +35,8 @@ namespace Communications.Appi
         {
             Ports = new Dictionary<AppiLine, AppiCanPort>()
             {
-                { AppiLine.Can1, new AppiCanPort(AppiLine.Can1) },
-                { AppiLine.Can2, new AppiCanPort(AppiLine.Can2) }
+                { AppiLine.Can1, new AppiCanPort(this, AppiLine.Can1) },
+                { AppiLine.Can2, new AppiCanPort(this, AppiLine.Can2) }
             };
         }
         public virtual void Dispose()
@@ -71,13 +72,13 @@ namespace Communications.Appi
         /// <param name="Buff">Буфер сообщений</param>
         /// <param name="Offset">Отступ от начала буфера</param>
         /// <param name="Count">Количество сообщений в буфере</param>
-        private IEnumerable<CanMessage> ParseBuffer(Byte[] Buff, int Offset, int Count)
+        private IEnumerable<CanFrame> ParseBuffer(Byte[] Buff, int Offset, int Count)
         {
             Byte[] buff = new Byte[10];
             for (int i = 0; i < Count; i++)
             {
                 Buffer.BlockCopy(Buff, Offset + i * buff.Length, buff, 0, buff.Length);
-                yield return CanMessage.FromBufferBytes(buff);
+                yield return AppiCanFrameConstructor.FromBufferBytes(buff);
             }
         }
 
@@ -85,17 +86,17 @@ namespace Communications.Appi
         /// <summary>
         /// Отправляет список сообщений в указанный канал
         /// </summary>
-        /// <param name="Messages">Список сообщений</param>
+        /// <param name="Frames">Список сообщений</param>
         /// <param name="Line">Канал связи</param>
-        public void SendMessages(IList<CanMessage> Messages, AppiLine Line)
+        internal void SendFrames(IList<CanFrame> Frames, AppiLine Line)
         {
             Byte[] Buff = new Byte[2048];
             Buffer.SetByte(Buff, 0, 0x02);
             Buffer.SetByte(Buff, 1, (byte)Line);
             Buffer.SetByte(Buff, 3, SendMessageCounter);
-            Buffer.SetByte(Buff, 3, (byte)Messages.Count);
+            Buffer.SetByte(Buff, 3, (byte)Frames.Count);
 
-            var MessagesBuffer = Messages.SelectMany(m => m.ToBufferBytes()).ToArray();
+            var MessagesBuffer = Frames.SelectMany(m => m.ToBufferBytes()).ToArray();
             Buffer.BlockCopy(MessagesBuffer, 0, Buff, 10, MessagesBuffer.Length);
 
             WriteBuffer(Buff);
@@ -105,11 +106,11 @@ namespace Communications.Appi
         /// <summary>
         /// Отправляет одно сообщение в канал
         /// </summary>
-        /// <param name="Message">CAN-Сообщение</param>
+        /// <param name="Frame">CAN-Сообщение</param>
         /// <param name="Line">Канал связи</param>
-        public void SendMessage(CanMessage Message, AppiLine Line)
+        internal void SendFrame(CanFrame Frame, AppiLine Line)
         {
-            SendMessages(new List<CanMessage>() { Message }, Line);
+            SendFrames(new List<CanFrame>() { Frame }, Line);
         }
 
         public event AppiReceiveEventHandler AppiMessagesRecieved;
@@ -118,8 +119,8 @@ namespace Communications.Appi
         {
             if (AppiMessagesRecieved != null) AppiMessagesRecieved(this, new AppiMessageRecieveEventArgs(mes));
 
-            Ports[AppiLine.Can1].OnMessagesRecieved(mes.ChannelA);
-            Ports[AppiLine.Can2].OnMessagesRecieved(mes.ChannelB);
+            Ports[AppiLine.Can1].OnAppiFramesRecieved(mes.ChannelA);
+            Ports[AppiLine.Can2].OnAppiFramesRecieved(mes.ChannelB);
         }
 
         /// <summary>
@@ -163,7 +164,6 @@ namespace Communications.Appi
         }
     }
 
-
     public delegate void AppiReceiveEventHandler(object sender, AppiMessageRecieveEventArgs e);
     public class AppiMessageRecieveEventArgs : EventArgs
     {
@@ -172,6 +172,34 @@ namespace Communications.Appi
         public AppiMessageRecieveEventArgs(AppiMessages Messages)
         {
             this.Messages = Messages;
+        }
+    }
+
+    internal static class AppiCanFrameConstructor
+    {
+        /// <summary>
+        /// Собирает байты для буфера АППИ
+        /// </summary>
+        /// <returns>10 байт: 2 байта дескриптор + 8 байт данных</returns>
+        public static Byte[] ToBufferBytes(this CanFrame Frame)
+        {
+            Byte[] buff = new Byte[10];
+
+            BitConverter.GetBytes((UInt16)Frame.Descriptor).Reverse().ToArray().CopyTo(buff, 0);
+            Frame.Data.CopyTo(buff, 2);
+
+            return buff;
+        }
+
+        /// <summary>
+        /// Восстанавливает CAN-сообщение из буфера АППИ
+        /// </summary>
+        /// <param name="Buff">10 байт буфера</param>
+        public static CanFrame FromBufferBytes(Byte[] Buff)
+        {
+            int id = (int)BitConverter.ToUInt16(Buff.Take(2).Reverse().ToArray(), 0) >> 4;
+            int len = Buff[1] & 0x0f;
+            return CanFrame.NewWithId(id, Buff, 2, len);
         }
     }
 }

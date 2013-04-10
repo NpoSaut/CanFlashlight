@@ -44,8 +44,13 @@
     <Compile Include="AppiDev.cs" />
     <Compile Include="AppiDeviceSlot.cs" />
     <Compile Include="AppiMessages.cs" />
-    <Compile Include="CanMessage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CanLine\CanLine.csproj">
+      <Project>{5BD64D61-F283-4833-B5A0-25EBE435AC89}</Project>
+      <Name>CanLine</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
