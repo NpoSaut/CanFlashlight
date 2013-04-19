@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Collections.Concurrent;
 
 namespace Communications.Can
 {
@@ -22,6 +23,7 @@ namespace Communications.Can
         protected CanPort(String PortName)
         {
             this.Name = PortName;
+            Handlers = new ConcurrentBag<CanFrameHandler>();
         }
 
         #region Отправка сообщений
@@ -46,16 +48,23 @@ namespace Communications.Can
         /// <param name="Frames">Принятые фреймы</param>
         protected void OnFramesRecieved(IList<CanFrame> Frames)
         {
-            if (Frames.Any() && Recieved != null) Recieved(this, new CanFramesReceiveEventArgs(Frames));
+            if (Frames.Any() && Recieved != null) Recieved(this, new CanFramesReceiveEventArgs(Frames, this));
+
+            foreach (var d in Frames.GroupBy(f => f.Descriptor))
+                foreach (var h in Handlers.Where(hh => hh.Descriptor == d.Key))
+                    h.OnRecieved(d.ToList(), this);
         }
-    }
+
+        public ConcurrentBag<CanFrameHandler> Handlers { get; private set; }
+    }   
     
     public delegate void CanFramesReceiveEventHandler(object sender, CanFramesReceiveEventArgs e);
     public class CanFramesReceiveEventArgs : EventArgs
     {
+        public CanPort Port { get; set; }
         public IList<CanFrame> Frames { get; set; }
 
-        public CanFramesReceiveEventArgs(IList<CanFrame> Frames)
+        public CanFramesReceiveEventArgs(IList<CanFrame> Frames, CanPort Port)
         {
             this.Frames = Frames;
         }

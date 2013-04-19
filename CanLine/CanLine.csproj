@@ -41,6 +41,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CanFrame.cs" />
+    <Compile Include="CanFrameHandler.cs" />
     <Compile Include="CanPort.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
