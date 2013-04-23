@@ -55,6 +55,8 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Models\FilterModel.cs" />
+    <Compile Include="Models\FrameModel.cs" />
     <Compile Include="SniffWindow.xaml.cs">
       <DependentUpon>SniffWindow.xaml</DependentUpon>
     </Compile>
@@ -101,6 +103,12 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Dialogs\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CanLine\CanLine.csproj">
+      <Project>{5BD64D61-F283-4833-B5A0-25EBE435AC89}</Project>
+      <Name>CanLine</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

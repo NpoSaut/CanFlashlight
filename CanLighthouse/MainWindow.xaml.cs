@@ -11,6 +11,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Communications.Can.LogReader;
+using System.IO;
 
 namespace CanLighthouse
 {
@@ -22,6 +24,12 @@ namespace CanLighthouse
         public MainWindow()
         {
             InitializeComponent();
+        }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            (new SniffWindow()).ShowDialog();
+            this.Close();
         }
     }
 }

@@ -43,6 +43,7 @@
     <Compile Include="CanFrame.cs" />
     <Compile Include="CanFrameHandler.cs" />
     <Compile Include="CanPort.cs" />
+    <Compile Include="LogReader\LogReaderPort.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

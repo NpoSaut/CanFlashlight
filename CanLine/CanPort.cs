@@ -54,6 +54,14 @@ namespace Communications.Can
                 foreach (var h in Handlers.Where(hh => hh.Descriptor == d.Key))
                     h.OnRecieved(d.ToList(), this);
         }
+        /// <summary>
+        /// Обработка одного принятого фрейма
+        /// </summary>
+        /// <param name="Frames">Принятый фрейм</param>
+        protected void OnFrameRecieved(CanFrame Frame)
+        {
+            OnFramesRecieved(new List<CanFrame>() { Frame });
+        }
 
         public ConcurrentBag<CanFrameHandler> Handlers { get; private set; }
     }   
