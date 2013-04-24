@@ -15,6 +15,7 @@ using System.IO;
 using CanLighthouse.Models;
 using System.Collections.ObjectModel;
 using Communications.Can;
+using System.Xml.Linq;
 
 namespace CanLighthouse
 {
@@ -28,6 +29,8 @@ namespace CanLighthouse
         public ObservableCollection<FilterModel> Filters { get; private set; }
 
         public List<Brush> HighlightBrushes { get; private set; }
+
+        private ResourceDictionary ColorsDic = new ResourceDictionary();
 
         public SniffWindow()
         {
@@ -49,11 +52,30 @@ namespace CanLighthouse
 
             InitializeComponent();
 
+            LoadColorScheme("Default.chl");
+
             LogReaderPort rp = new LogReaderPort(new FileInfo("can.txt"));
 
             rp.Recieved += new Communications.Can.CanFramesReceiveEventHandler(rp_Recieved);
             rp.Start();
         }
+
+        private void LoadColorScheme(String FileName)
+        {
+            var Highlights = XDocument.Load(FileName).Root
+                                .Elements("highlight")
+                                .Select(hl =>
+                                    new
+                                    {
+                                        desc = hl.Attribute("descriptor").Value,
+                                        Brush = new SolidColorBrush((Color)ColorConverter.ConvertFromString(hl.Attribute("color").Value))
+                                    });
+            foreach (var hl in Highlights)
+            {
+                this.Resources.Add(string.Format("Brush{0}", hl.desc), hl.Brush);
+            }
+        }
+
         private bool FrameFilter(object fo)
         {
             var fr = fo as FrameModel;
@@ -74,22 +96,30 @@ namespace CanLighthouse
 
             Filters.Clear();
 
-            foreach (var p in s.Document.Blocks.OfType<Paragraph>())
+            foreach (var c in e.Changes)
             {
-                var str = (new TextRange(p.ContentStart, p.ContentEnd)).Text;
-                var dm = System.Text.RegularExpressions.Regex.Match(str, @"[0-9a-fA-F]{4}");
-                if (dm.Success)
+
+                foreach (var p in s.Document.Blocks.OfType<Paragraph>())
                 {
-                    var descr = Convert.ToUInt16(dm.Value, 16);
-                    FilterModel f;
-                    Filters.Add((f = new FilterModel() { Descriptor = descr }));
+                    var str = (new TextRange(p.ContentStart, p.ContentEnd)).Text;
+                    var dm = System.Text.RegularExpressions.Regex.Match(str, @"[0-9a-fA-F]{4}");
+                    if (dm.Success)
+                    {
+                        var descr = Convert.ToUInt16(dm.Value, 16);
+                        FilterModel f;
+                        Filters.Add((f = new FilterModel() { Descriptor = descr }));
 
-                    f.Foreground = p.Foreground;
-                    f.Background = p.Background;
+                        var resourceKey = string.Format("Brush{0:X4}", f.Descriptor);
+                        if (Resources.Contains(resourceKey))
+                            p.SetResourceReference(Control.ForegroundProperty, resourceKey);
+                        else
+                            p.ClearValue(Control.ForegroundProperty);
 
-                    f.IsEnabled = !str.Trim().StartsWith("//");
+                        f.IsEnabled = !str.Trim().StartsWith("//");
 
-                    p.DataContext = f;
+                        p.DataContext = f;
+                    }
+                    else p.SetResourceReference(Control.ForegroundProperty, "BrushComment");
                 }
             }
 
@@ -101,13 +131,7 @@ namespace CanLighthouse
         {
             var s = sender as DataGridRow;
             var frame = s.DataContext as FrameModel;
-            //var filter = Filters.SingleOrDefault(f => f.Descriptor == frame.Descriptor);
-            //if (filter != null)
-            //{
-            //    s.Foreground = filter.Foreground;
-            //    s.Background = filter.Background;
-            //}
-            s.SetResourceReference(Control.ForegroundProperty, string.Format("Brush{0}", frame.Descriptor.ToString("X4")));
+            s.SetResourceReference(Control.ForegroundProperty, string.Format("Brush{0:X4}", frame.Descriptor));
         }
 
         private void FiltersEdit_SelectionChanged(object sender, RoutedEventArgs e)
