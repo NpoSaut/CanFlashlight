@@ -26,7 +26,7 @@ namespace CanLighthouse
     {
         public ObservableCollection<FrameModel> Frames { get; private set; }
         public ListCollectionView FramesCV { get; set; }
-        public ObservableCollection<FilterModel> Filters { get; private set; }
+        public List<UInt16> Filters { get; private set; }
 
         public List<Brush> HighlightBrushes { get; private set; }
 
@@ -39,8 +39,9 @@ namespace CanLighthouse
 
             Frames = new ObservableCollection<FrameModel>();
             FramesCV = new ListCollectionView(Frames);
+            //FramesCV.Filter = FrameFilter;
 
-            Filters = new ObservableCollection<FilterModel>();
+            Filters = new List<ushort>();
 
             HighlightBrushes = new List<Brush>()
                             {
@@ -73,13 +74,14 @@ namespace CanLighthouse
             foreach (var hl in Highlights)
             {
                 this.Resources.Add(string.Format("Brush{0}", hl.desc), hl.Brush);
+                HighlightBrushes.Add(hl.Brush);
             }
         }
 
         private bool FrameFilter(object fo)
         {
             var fr = fo as FrameModel;
-            return Filters.Where(f => f.IsEnabled).Any(f => f.Descriptor == fr.Descriptor);
+            return Filters.Contains(fr.Descriptor);
         }
 
         void rp_Recieved(object sender, Communications.Can.CanFramesReceiveEventArgs e)
@@ -91,70 +93,69 @@ namespace CanLighthouse
         private void FiltersEdit_TextChanged(object sender, TextChangedEventArgs e)
         {
             if (!e.Changes.Any()) return;
+            var s = sender as TextBox;
 
-            var s = sender as RichTextBox;
-
-            Filters.Clear();
-
-            foreach (var c in e.Changes)
+            var NewFilters = new List<ushort>();
+            foreach (var str in s.Text.Split(new Char[] { '\n' }))
             {
-
-                foreach (var p in s.Document.Blocks.OfType<Paragraph>())
-                {
-                    var str = (new TextRange(p.ContentStart, p.ContentEnd)).Text;
-                    var dm = System.Text.RegularExpressions.Regex.Match(str, @"[0-9a-fA-F]{4}");
-                    if (dm.Success)
-                    {
-                        var descr = Convert.ToUInt16(dm.Value, 16);
-                        FilterModel f;
-                        Filters.Add((f = new FilterModel() { Descriptor = descr }));
-
-                        var resourceKey = string.Format("Brush{0:X4}", f.Descriptor);
-                        if (Resources.Contains(resourceKey))
-                            p.SetResourceReference(Control.ForegroundProperty, resourceKey);
-                        else
-                            p.ClearValue(Control.ForegroundProperty);
-
-                        f.IsEnabled = !str.Trim().StartsWith("//");
-
-                        p.DataContext = f;
-                    }
-                    else p.SetResourceReference(Control.ForegroundProperty, "BrushComment");
-                }
+                var descr = GetDescripter(str);
+                if (descr > 0)
+                    NewFilters.Add(descr);
             }
 
-            if (Filters.Where(f => f.IsEnabled).Any()) FramesCV.Filter = FrameFilter;
-            else FramesCV.Filter = null;
+            if (!Filters.SequenceEqual(NewFilters))
+            {
+                Filters.Clear();
+                Filters.AddRange(NewFilters);
+                if (Filters.Any()) FramesCV.Filter = FrameFilter;
+                else FramesCV.Filter = null;
+            }
+        }
+
+        private ushort GetDescripter(String str)
+        {
+            if (str.Trim().StartsWith("//")) return 0;
+
+            var dm = System.Text.RegularExpressions.Regex.Match(str, @"[0-9a-fA-F]{4}");
+            if (dm.Success)
+            {
+                return Convert.ToUInt16(dm.Value, 16);
+            }
+            else return 0;
+        }
+        private string GetResourceNameForDescripter(uint descripter)
+        {
+            return string.Format("Brush{0:X4}", descripter);
         }
 
         private void DataGridRow_Loaded(object sender, RoutedEventArgs e)
         {
             var s = sender as DataGridRow;
             var frame = s.DataContext as FrameModel;
-            s.SetResourceReference(Control.ForegroundProperty, string.Format("Brush{0:X4}", frame.Descriptor));
+            s.SetResourceReference(Control.ForegroundProperty, GetResourceNameForDescripter(frame.Descriptor));
+        }
+
+        private uint GetEditingDescripter()
+        {
+            string line = FiltersEdit.GetLineText(FiltersEdit.GetLineIndexFromCharacterIndex(FiltersEdit.SelectionStart));
+            return GetDescripter(line ?? "");
         }
 
         private void FiltersEdit_SelectionChanged(object sender, RoutedEventArgs e)
         {
-            if (FiltersEdit.Selection.Start.Paragraph != null)
-                ColorPicker.SelectedItem = HighlightBrushes.SingleOrDefault(b => b.Equals(FiltersEdit.Selection.Start.Paragraph.Foreground)) ?? Foreground;
+            var descr = GetEditingDescripter();
+            var brush = TryFindResource(GetResourceNameForDescripter(descr));
+            ColorPicker.SelectedItem = brush;
         }
 
         private void ColorPicker_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var p = FiltersEdit.Selection.Start.Paragraph;
-            if (p != null)
-            {
-                var SetBrush = (Brush)(sender as ComboBox).SelectedItem;
-                p.Foreground = SetBrush;
-                var f = p.DataContext as FilterModel;
-                if (f != null)
-                {
-                    var resourceKey = string.Format("Brush{0}", f.Descriptor.ToString("X4"));
-                    if (!Resources.Contains(resourceKey)) Resources.Add(resourceKey, SetBrush);
-                    else Resources[resourceKey] = SetBrush;
-                }
-            }
+            var SetBrush = (Brush)(sender as ComboBox).SelectedItem;
+
+            var des = GetEditingDescripter();
+            var resourceKey = GetResourceNameForDescripter(des);
+            if (!Resources.Contains(resourceKey)) Resources.Add(resourceKey, SetBrush);
+            else Resources[resourceKey] = SetBrush;
         }
     }
 }
