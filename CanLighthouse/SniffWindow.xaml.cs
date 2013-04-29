@@ -16,6 +16,7 @@ using CanLighthouse.Models;
 using System.Collections.ObjectModel;
 using Communications.Can;
 using System.Xml.Linq;
+using System.Collections.Specialized;
 
 namespace CanLighthouse
 {
@@ -32,14 +33,16 @@ namespace CanLighthouse
 
         private ResourceDictionary ColorsDic = new ResourceDictionary();
 
-        public SniffWindow()
+        public ObservableCollection<CanPort> ListeningPorts { get; private set; }
+
+        public SniffWindow(IEnumerable<CanPort> OnPorts)
         {
             // Необъяснимый костыль для поправки локализации строковых конвертеров
             Language = System.Windows.Markup.XmlLanguage.GetLanguage(System.Globalization.CultureInfo.CurrentCulture.IetfLanguageTag);
 
             Frames = new ObservableCollection<FrameModel>();
             FramesCV = new ListCollectionView(Frames);
-            //FramesCV.Filter = FrameFilter;
+            Frames.CollectionChanged += new System.Collections.Specialized.NotifyCollectionChangedEventHandler(Frames_CollectionChanged);
 
             Filters = new List<ushort>();
 
@@ -55,10 +58,28 @@ namespace CanLighthouse
 
             LoadColorScheme("Default.chl");
 
-            LogReaderPort rp = new LogReaderPort(new FileInfo("can.txt"));
+            ListeningPorts = new ObservableCollection<CanPort>();
+            ListeningPorts.CollectionChanged += new NotifyCollectionChangedEventHandler(ListeningPorts_CollectionChanged);
+            foreach (var lp in OnPorts) ListeningPorts.Add(lp);
+        }
 
-            rp.Recieved += new Communications.Can.CanFramesReceiveEventHandler(rp_Recieved);
-            rp.Start();
+        void ListeningPorts_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            if (e.NewItems != null)
+                foreach (var np in e.NewItems.OfType<CanPort>())
+                    np.Recieved += CanFrames_Recieved;
+
+            if (e.OldItems != null)
+                foreach (var np in e.OldItems.OfType<CanPort>())
+                    np.Recieved -= CanFrames_Recieved;
+
+            this.Title = String.Format("Прослушивание {0}", string.Join(", ", ListeningPorts.Select(p => p.Name)));
+        }
+
+        void Frames_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            if (e.NewItems != null)
+                LogGrid.ScrollIntoView(e.NewItems[e.NewItems.Count - 1]);
         }
 
         private void LoadColorScheme(String FileName)
@@ -84,10 +105,16 @@ namespace CanLighthouse
             return Filters.Contains(fr.Descriptor);
         }
 
-        void rp_Recieved(object sender, Communications.Can.CanFramesReceiveEventArgs e)
+        void CanFrames_Recieved(object sender, Communications.Can.CanFramesReceiveEventArgs e)
         {
-            foreach (var f in e.Frames)
-                Dispatcher.BeginInvoke((Action<FrameModel>)Frames.Add, new FrameModel(f));
+            Dispatcher.BeginInvoke((Action<IList<FrameModel>>)CanFrames_InterfaceAdd,
+                System.Windows.Threading.DispatcherPriority.Input,
+                e.Frames.Select(f => new FrameModel(f) { PortName = (sender as CanPort).Name }).ToList());
+        }
+        private void CanFrames_InterfaceAdd(IList<FrameModel> FrameModels)
+        {
+            foreach (var f in FrameModels)
+                Frames.Add(f);
         }
 
         private void FiltersEdit_TextChanged(object sender, TextChangedEventArgs e)
@@ -98,7 +125,7 @@ namespace CanLighthouse
             var NewFilters = new List<ushort>();
             foreach (var str in s.Text.Split(new Char[] { '\n' }))
             {
-                var descr = GetDescripter(str);
+                var descr = GetDescriptor(str);
                 if (descr > 0)
                     NewFilters.Add(descr);
             }
@@ -112,7 +139,7 @@ namespace CanLighthouse
             }
         }
 
-        private ushort GetDescripter(String str)
+        private ushort GetDescriptor(String str)
         {
             if (str.Trim().StartsWith("//")) return 0;
 
@@ -123,28 +150,21 @@ namespace CanLighthouse
             }
             else return 0;
         }
-        private string GetResourceNameForDescripter(uint descripter)
+        private string GetResourceNameForDescriptor(uint descriptor)
         {
-            return string.Format("Brush{0:X4}", descripter);
+            return string.Format("Brush{0:X4}", descriptor);
         }
 
-        private void DataGridRow_Loaded(object sender, RoutedEventArgs e)
-        {
-            var s = sender as DataGridRow;
-            var frame = s.DataContext as FrameModel;
-            s.SetResourceReference(Control.ForegroundProperty, GetResourceNameForDescripter(frame.Descriptor));
-        }
-
-        private uint GetEditingDescripter()
+        private uint GetEditingDescriptor()
         {
             string line = FiltersEdit.GetLineText(FiltersEdit.GetLineIndexFromCharacterIndex(FiltersEdit.SelectionStart));
-            return GetDescripter(line ?? "");
+            return GetDescriptor(line ?? "");
         }
 
         private void FiltersEdit_SelectionChanged(object sender, RoutedEventArgs e)
         {
-            var descr = GetEditingDescripter();
-            var brush = TryFindResource(GetResourceNameForDescripter(descr));
+            var descr = GetEditingDescriptor();
+            var brush = TryFindResource(GetResourceNameForDescriptor(descr));
             ColorPicker.SelectedItem = brush;
         }
 
@@ -152,10 +172,16 @@ namespace CanLighthouse
         {
             var SetBrush = (Brush)(sender as ComboBox).SelectedItem;
 
-            var des = GetEditingDescripter();
-            var resourceKey = GetResourceNameForDescripter(des);
+            var des = GetEditingDescriptor();
+            var resourceKey = GetResourceNameForDescriptor(des);
             if (!Resources.Contains(resourceKey)) Resources.Add(resourceKey, SetBrush);
             else Resources[resourceKey] = SetBrush;
+        }
+
+        private void LogGrid_LoadingRow(object sender, DataGridRowEventArgs e)
+        {
+            var frame = e.Row.DataContext as FrameModel;
+            e.Row.SetResourceReference(Control.ForegroundProperty, GetResourceNameForDescriptor(frame.Descriptor));
         }
     }
 }

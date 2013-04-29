@@ -57,6 +57,11 @@
     </ApplicationDefinition>
     <Compile Include="Models\FilterModel.cs" />
     <Compile Include="Models\FrameModel.cs" />
+    <Compile Include="Models\SendingModel.cs" />
+    <Compile Include="SendOperation.cs" />
+    <Compile Include="SendWindow.xaml.cs">
+      <DependentUpon>SendWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="SniffWindow.xaml.cs">
       <DependentUpon>SniffWindow.xaml</DependentUpon>
     </Compile>
@@ -72,6 +77,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="SendWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="SniffWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -109,6 +118,14 @@
     <Folder Include="Dialogs\" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\AppiDrvWinusb\AppiDrvWinusb.csproj">
+      <Project>{82EB0C22-FADE-497A-BE09-FFA3624D4E63}</Project>
+      <Name>AppiDrvWinusb</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\AppiWorking\AppiWorking.csproj">
+      <Project>{F0B79856-02E6-41EC-8F95-4AA17604BA11}</Project>
+      <Name>AppiWorking</Name>
+    </ProjectReference>
     <ProjectReference Include="..\CanLine\CanLine.csproj">
       <Project>{5BD64D61-F283-4833-B5A0-25EBE435AC89}</Project>
       <Name>CanLine</Name>

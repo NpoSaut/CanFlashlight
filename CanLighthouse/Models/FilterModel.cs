@@ -48,39 +48,5 @@ namespace CanLighthouse.Models
                 }
             }
         }
-
-        //private Brush _Foreground;
-        ///// <summary>
-        ///// Подсветка текста
-        ///// </summary>
-        //public Brush Foreground
-        //{
-        //    get { return _Foreground; }
-        //    set
-        //    {
-        //        if (_Foreground != value)
-        //        {
-        //            _Foreground = value;
-        //            OnPropertyChanged("Foreground");
-        //        }
-        //    }
-        //}
-
-        //private Brush _Background;
-        ///// <summary>
-        ///// Подсветка фона
-        ///// </summary>
-        //public Brush Background
-        //{
-        //    get { return _Background ?? Brushes.White; }
-        //    set
-        //    {
-        //        if (_Background != value)
-        //        {
-        //            _Background = value;
-        //            OnPropertyChanged("Background");
-        //        }
-        //    }
-        //}
     }
 }

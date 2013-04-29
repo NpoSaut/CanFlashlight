@@ -19,9 +19,14 @@ namespace Communications.Can
         /// Событие приёма сообщения по линии
         /// </summary>
         public event CanFramesReceiveEventHandler Recieved;
+        /// <summary>
+        /// Генерировать ли Loopback-пакеты для каждого отправленного пакета
+        /// </summary>
+        public bool GenerateLoopbackEcho { get; set; }
 
         protected CanPort(String PortName)
         {
+            this.GenerateLoopbackEcho = true;
             this.Name = PortName;
             Handlers = new ConcurrentBag<CanFrameHandler>();
         }
@@ -31,7 +36,11 @@ namespace Communications.Can
         /// Отправка нескольких фреймов в линию
         /// </summary>
         /// <param name="Frames">Фреймы для отправки</param>
-        public abstract void Send(IList<CanFrame> Frames);
+        public void Send(IList<CanFrame> Frames)
+        {
+            SendImplementation(Frames);
+            OnSent(Frames);
+        }
         /// <summary>
         /// Отправка одного фрейма в линию
         /// </summary>
@@ -39,7 +48,21 @@ namespace Communications.Can
         public void Send(CanFrame Frame)
         {
             Send(new List<CanFrame>() { Frame });
-        } 
+        }
+        /// <summary>
+        /// Внутренняя реализация отправки сообщений
+        /// </summary>
+        /// <param name="Frames"></param>
+        protected abstract void SendImplementation(IList<CanFrame> Frames);
+        /// <summary>
+        /// Обрабатывается после отправки сообщений
+        /// </summary>
+        /// <param name="Frames">Список отправленных сообщений</param>
+        protected virtual void OnSent(IList<CanFrame> Frames)
+        {
+            if (GenerateLoopbackEcho)
+                this.OnFramesRecieved(Frames.Select(f => f.GetLoopbackFrame()).ToList());
+        }
         #endregion
 
         /// <summary>
@@ -64,6 +87,11 @@ namespace Communications.Can
         }
 
         public ConcurrentBag<CanFrameHandler> Handlers { get; private set; }
+
+        public override string ToString()
+        {
+            return string.Format("CanPort {0}", Name);
+        }
     }   
     
     public delegate void CanFramesReceiveEventHandler(object sender, CanFramesReceiveEventArgs e);

@@ -64,9 +64,10 @@ namespace Communications.Can.LogReader
             else ReadTimer.Stop();
         }
 
-        public override void Send(IList<CanFrame> Frames)
+        protected override void SendImplementation(IList<CanFrame> Frames)
         {
-            throw new NotImplementedException("Не поддерживается отправка в файл");
+            foreach (var fr in Frames)
+                Console.WriteLine(String.Format("{0}  <<-  {1}", Name, fr));
         }
 
         public void Dispose()

@@ -28,7 +28,20 @@ namespace Communications.Can
             get { return Id * 0x20 + Data.Length; }
         }
 
-        private CanFrame()
+        /// <summary>
+        /// Показывает, является ли данный пакет Loopback-пакетом
+        /// </summary>
+        public bool IsLoopback { get; private set; }
+
+        /// <summary>
+        /// Является ли этот фрейм обработанным
+        /// </summary>
+        /// <remarks>
+        /// При передаче принятого пакета по стеку, можно использовать для того, чтобы отметить пакет, на который уже осуществлена реакция
+        /// </remarks>
+        public bool Processed { get; set; }
+
+        protected CanFrame()
         {
         }
 
@@ -85,6 +98,27 @@ namespace Communications.Can
         public static CanFrame NewWithDescriptor(int Descriptor)
         {
             return NewWithDescriptor(Descriptor, new Byte[0]);
+        }
+
+        /// <summary>
+        /// Создаёт новую объект фрейма
+        /// </summary>
+        public CanFrame Clone()
+        {
+            return new CanFrame()
+            {
+                Id = this.Id,
+                Data = this.Data
+            };
+        }
+        /// <summary>
+        /// Создаёт Loopback-пакет для данного
+        /// </summary>
+        public CanFrame GetLoopbackFrame()
+        {
+            var l = this.Clone();
+            l.IsLoopback = true;
+            return l;
         }
 
         public override string ToString()

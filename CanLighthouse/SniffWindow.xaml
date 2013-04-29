@@ -25,20 +25,16 @@
         <DataGrid Grid.Row="1" Grid.Column="0" Margin="2"
                   ItemsSource="{Binding ElementName=sw, Path=FramesCV}"
                   AutoGenerateColumns="False" IsReadOnly="True"
-                  HorizontalGridLinesBrush="{StaticResource LinesHorizontal}" VerticalGridLinesBrush="{StaticResource LinesVertical}" Name="LogGrid">
+                  HorizontalGridLinesBrush="{StaticResource LinesHorizontal}" VerticalGridLinesBrush="{StaticResource LinesVertical}" Name="LogGrid" LoadingRow="LogGrid_LoadingRow">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="#" Visibility="Collapsed" />
-                <DataGridTextColumn Header="Время" Binding="{Binding RecieveTime, StringFormat='HH:mm:ss.f'}" />
+                <DataGridTextColumn Header="Время" Binding="{Binding RecieveTime, StringFormat='HH:mm:ss.ff'}" />
+                <DataGridTextColumn Header="Порт" Binding="{Binding PortName}" />
                 <DataGridTextColumn Header="ID" Binding="{Binding Id}" Visibility="Collapsed" />
                 <DataGridTextColumn Header="Дескр" Binding="{Binding Descriptor, StringFormat=X4}" />
                 <DataGridTextColumn Header="Данные" Binding="{Binding HexString}" />
                 <DataGridTextColumn Header="Двоичные" Binding="{Binding BinaryString}" />
             </DataGrid.Columns>
-            <DataGrid.RowStyle>
-                <Style TargetType="DataGridRow">
-                    <EventSetter Event="Loaded" Handler="DataGridRow_Loaded" />
-                </Style>
-            </DataGrid.RowStyle>
         </DataGrid>
         
         <Grid Grid.Row="1" Grid.Column="1" Width="150">
@@ -49,10 +45,10 @@
             </Grid.RowDefinitions>
             <Label Grid.Row="0" Margin="2" Target="{Binding ElementName=FiltersEdit}">_Фильтры</Label>
             <TextBox Grid.Row="1" Margin="2" Name="FiltersEdit" TextChanged="FiltersEdit_TextChanged" SelectionChanged="FiltersEdit_SelectionChanged" AcceptsReturn="True" />
-            <ComboBox Grid.Row="2" ItemsSource="{Binding ElementName=sw, Path=HighlightBrushes}" Name="ColorPicker" SelectionChanged="ColorPicker_SelectionChanged" SelectedIndex="0">
+            <ComboBox Grid.Row="2" Margin="2" ItemsSource="{Binding ElementName=sw, Path=HighlightBrushes}" Name="ColorPicker" SelectionChanged="ColorPicker_SelectionChanged" SelectedIndex="0">
                 <ComboBox.ItemTemplate>
                     <DataTemplate>
-                        <Rectangle Height="10" Width="50" Fill="{Binding}" />
+                        <Rectangle Height="10" Width="70" Fill="{Binding}" />
                     </DataTemplate>
                 </ComboBox.ItemTemplate>
             </ComboBox>
