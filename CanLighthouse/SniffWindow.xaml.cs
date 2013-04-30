@@ -80,8 +80,8 @@ namespace CanLighthouse
 
         void Frames_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
-            if (e.NewItems != null)
-                LogGrid.ScrollIntoView(e.NewItems[e.NewItems.Count - 1]);
+            //if (e.NewItems != null)
+            //    LogGrid.ScrollIntoView(e.NewItems[e.NewItems.Count - 1]);
         }
 
         private void LoadColorScheme(String FileName)
@@ -109,20 +109,31 @@ namespace CanLighthouse
 
         void CanFrames_Recieved(object sender, Communications.Can.CanFramesReceiveEventArgs e)
         {
-            Dispatcher.BeginInvoke((Action<IList<FrameModel>>)CanFrames_InterfaceAdd,
-                System.Windows.Threading.DispatcherPriority.Input,
-                e.Frames.Select(f => new FrameModel(f) { PortName = (sender as CanPort).Name }).ToList());
-        }
-        private ConcurrentBag<FrameModel> FramesToInterfaceBuffer = new ConcurrentBag<FrameModel>();
-        private void CanFrames_InterfaceAdd(IList<FrameModel> FrameModels)
-        {
-            using (FramesCV.DeferRefresh())
+            var FrameModels = e.Frames.Select(f => new FrameModel(f) { PortName = (sender as CanPort).Name }).ToList();
+            foreach (var f in FrameModels)
+                FramesToInterfaceBuffer.Enqueue(f);
+
+            if (!FramesSyncronizationScheduled)
             {
-                for (int i = 0; i < Frames.Count + FrameModels.Count - CutOffCount; i++)
-                    Frames.RemoveAt(0);
-                foreach (var f in FrameModels)
-                    Frames.Add(f);
+                FramesSyncronizationScheduled = true;
+                Dispatcher.BeginInvoke((Action)SyncronizeFramesOutput,
+                    System.Windows.Threading.DispatcherPriority.Background);
             }
+        }
+        private bool FramesSyncronizationScheduled = false;
+        private ConcurrentQueue<FrameModel> FramesToInterfaceBuffer = new ConcurrentQueue<FrameModel>();
+        private void SyncronizeFramesOutput()
+        {
+            //for (int i = 0; i < Frames.Count + FramesToInterfaceBuffer.Count - CutOffCount; i++)
+            //    Frames.RemoveAt(0);
+            this.Title = string.Join("", Enumerable.Repeat('.', FramesToInterfaceBuffer.Count));
+            FrameModel f;
+            while (FramesToInterfaceBuffer.TryDequeue(out f))
+            {
+                Frames.Add(f);
+            }
+            FramesSyncronizationScheduled = false;
+            LogGrid.ScrollIntoView(Frames.Last());
         }
 
         private void FiltersEdit_TextChanged(object sender, TextChangedEventArgs e)
