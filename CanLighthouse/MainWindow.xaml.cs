@@ -16,37 +16,30 @@ using System.IO;
 using Communications.Can;
 using Communications.Appi.Winusb;
 using Communications.Appi;
+using System.Collections.ObjectModel;
 
 namespace CanLighthouse
 {
     /// <summary>
     /// Логика взаимодействия для MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window, IDisposable
+    public partial class MainWindow : Window
     {
         public MainWindow()
         {
             InitializeComponent();
         }
 
-        AppiDev appi;
+        public ObservableCollection<CanPort> Ports
+        {
+            get { return (App.Current as App).Ports; }
+        }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            appi = WinusbAppiDev.GetDevices().First().OpenDevice();
-            appi.BeginListen();
-            var rp = appi.Ports[AppiLine.Can1];
+            (new SendWindow(Ports.First()) { Owner = this }).Show();
 
-            (new SendWindow(rp)).Show();
-
-            (new SniffWindow(new List<CanPort>() { rp })).Show();
-
-            this.Close();
-        }
-
-        public void Dispose()
-        {
-            appi.Dispose();
+            (new SniffWindow(Ports) { Owner = this } ).Show();
         }
     }
 }

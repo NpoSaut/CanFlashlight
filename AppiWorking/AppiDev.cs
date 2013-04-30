@@ -127,6 +127,7 @@ namespace Communications.Appi
         /// Признак действия режима прослушивания линии
         /// </summary>
         public bool IsListening { get; private set; }
+        private object IsListeningSynchronizingObject = new object();
         private System.Threading.Thread ListeningThread;
         /// <summary>
         /// Начать прослушивание линии
@@ -134,21 +135,26 @@ namespace Communications.Appi
         /// <remarks>Запускает отдельный поток для прослушивания линии</remarks>
         public void BeginListen()
         {
-            if (!IsListening)
-            {
-                ListeningThread = new System.Threading.Thread(ListeningLoop);
-                IsListening = true;
-                ListeningThread.Start();
-            }
+            lock (IsListeningSynchronizingObject)
+                if (!IsListening)
+                {
+                    ListeningThread = new System.Threading.Thread(ListeningLoop);
+                    IsListening = true;
+                    ListeningThread.Start();
+                }
         }
         /// <summary>
         /// Петля прослушивания линии
         /// </summary>
         private void ListeningLoop()
         {
-            while (IsListening)
+            while (true)
             {
-                this.ReadMessages();
+                lock (IsListeningSynchronizingObject)
+                {
+                    if (!IsListening) break;
+                    else this.ReadMessages();
+                }
             }
         }
         /// <summary>
@@ -156,11 +162,25 @@ namespace Communications.Appi
         /// </summary>
         public void StopListening()
         {
-            if (IsListening)
-            {
-                IsListening = false;
-                ListeningThread.Abort();
-            }
+            lock (IsListeningSynchronizingObject)
+                if (IsListening)
+                {
+                    IsListening = false;
+                    //ListeningThread.Abort();
+                }
+        }
+
+        /// <summary>
+        /// Возникает при отключении устройства
+        /// </summary>
+        public event EventHandler Disconnected;
+
+        /// <summary>
+        /// События при отключении устройства.
+        /// </summary>
+        protected virtual void OnDisconnected()
+        {
+            if (Disconnected != null) Disconnected(this, new EventArgs());
         }
     }
 

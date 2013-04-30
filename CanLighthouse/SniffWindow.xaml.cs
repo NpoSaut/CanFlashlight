@@ -17,6 +17,7 @@ using System.Collections.ObjectModel;
 using Communications.Can;
 using System.Xml.Linq;
 using System.Collections.Specialized;
+using System.Collections.Concurrent;
 
 namespace CanLighthouse
 {
@@ -25,6 +26,7 @@ namespace CanLighthouse
     /// </summary>
     public partial class SniffWindow : Window
     {
+        private const int CutOffCount = 100;
         public ObservableCollection<FrameModel> Frames { get; private set; }
         public ListCollectionView FramesCV { get; set; }
         public List<UInt16> Filters { get; private set; }
@@ -111,10 +113,16 @@ namespace CanLighthouse
                 System.Windows.Threading.DispatcherPriority.Input,
                 e.Frames.Select(f => new FrameModel(f) { PortName = (sender as CanPort).Name }).ToList());
         }
+        private ConcurrentBag<FrameModel> FramesToInterfaceBuffer = new ConcurrentBag<FrameModel>();
         private void CanFrames_InterfaceAdd(IList<FrameModel> FrameModels)
         {
-            foreach (var f in FrameModels)
-                Frames.Add(f);
+            using (FramesCV.DeferRefresh())
+            {
+                for (int i = 0; i < Frames.Count + FrameModels.Count - CutOffCount; i++)
+                    Frames.RemoveAt(0);
+                foreach (var f in FrameModels)
+                    Frames.Add(f);
+            }
         }
 
         private void FiltersEdit_TextChanged(object sender, TextChangedEventArgs e)

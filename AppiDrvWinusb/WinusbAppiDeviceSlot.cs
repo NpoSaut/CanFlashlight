@@ -17,7 +17,7 @@ namespace Communications.Appi.Winusb
 
         public override bool IsFree
         {
-            get { return true; }
+            get { return !WinusbAppiDev.IsDeviceOpened(DeviceInfo.DevicePath); }
         }
 
         protected override AppiDev InternalOpenDevice()
