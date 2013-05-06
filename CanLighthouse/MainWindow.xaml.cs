@@ -40,6 +40,8 @@ namespace CanLighthouse
             (new SendWindow(Ports.First()) { Owner = this }).Show();
 
             (new SniffWindow(Ports) { Owner = this } ).Show();
+
+            (new WatchWindow(Ports.First()) { Owner = this }).Show();
         }
     }
 }

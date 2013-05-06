@@ -7,8 +7,6 @@
     <Window.Resources>
         <SolidColorBrush x:Key="LinesHorizontal">#0C000060</SolidColorBrush>
         <SolidColorBrush x:Key="LinesVertical">#1C000060</SolidColorBrush>
-
-        <SolidColorBrush x:Key="BrushComment" Color="Gray" />
     </Window.Resources>
     
     <Grid Margin="2">

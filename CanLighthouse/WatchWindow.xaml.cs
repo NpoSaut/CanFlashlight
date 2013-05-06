@@ -10,6 +10,9 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using Communications.Can;
+using CanLighthouse.Models;
+using System.Collections.ObjectModel;
 
 namespace CanLighthouse
 {
@@ -18,9 +21,30 @@ namespace CanLighthouse
     /// </summary>
     public partial class WatchWindow : Window
     {
-        public WatchWindow()
+        public CanPort Port { get; private set; }
+
+        public WatchWindow(CanPort OnPort)
         {
+            Port = OnPort;
+            Port.Recieved += new CanFramesReceiveEventHandler(Port_Recieved);
+            HandlerModels = new ObservableCollection<FrameHandlerModel>();
             InitializeComponent();
+        }
+
+        public ObservableCollection<FrameHandlerModel> HandlerModels { get; private set; }
+
+        void Port_Recieved(object sender, CanFramesReceiveEventArgs e)
+        {
+            lock (HandlerModels)
+            {
+                foreach (var f in e.Frames)
+                    if (!HandlerModels.Any(hm => hm.Descriptor == f.Descriptor && hm.Port == e.Port))
+                    {
+                        var hm = new FrameHandlerModel(f.Descriptor, e.Port);
+                        hm.Initialize();
+                        Dispatcher.BeginInvoke((Action<FrameHandlerModel>)HandlerModels.Add, hm);
+                    }
+            }
         }
     }
 }

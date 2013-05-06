@@ -10,20 +10,24 @@ namespace Communications.Can
     public class CanFrameHandler : IDisposable
     {
         public int Descriptor { get; set; }
+        internal List<CanPort> OnPorts;
 
         public event CanFramesReceiveEventHandler Recieved;
 
         public CanFrameHandler(int Descriptor)
         {
             this.Descriptor = Descriptor;
-            this.ValueValidnessTime = TimeSpan.FromMilliseconds(1000);
+            this.ValueValidnessTime = TimeSpan.FromMilliseconds(1500);
+            this.OnPorts = new List<CanPort>();
 
-            lock (Handlers)
-                Handlers.Add(this);
+            lock (AllHandlers)
+                AllHandlers.Add(this);
         }
 
         internal void OnRecieved(IList<CanFrame> Frames, CanPort FromPort)
         {
+            SetLastFrame(Frames.Last());
+
             if (Recieved != null) Recieved(this, new CanFramesReceiveEventArgs(Frames, FromPort));
 
             lock (WaitLocker)
@@ -75,12 +79,15 @@ namespace Communications.Can
         {
             while (true)
             {
-                foreach (var h in Handlers)
+                lock (AllHandlers)
                 {
-                    DateTime dt = DateTime.Now;
-                    lock (h.LastValueLocker)
+                    foreach (var h in AllHandlers)
                     {
-                        h.LastFrameValid = h.LastFrameValid && (h.LastFrameRecieveTime.Add(h.ValueValidnessTime) >= dt);
+                        DateTime dt = DateTime.Now;
+                        lock (h.LastValueLocker)
+                        {
+                            h.LastFrameValid = h.LastFrameValid && (h.LastFrameRecieveTime.Add(h.ValueValidnessTime) >= dt);
+                        }
                     }
                 }
                 Thread.Yield();
@@ -99,10 +106,10 @@ namespace Communications.Can
             return PendingFrame;
         }
 
-        private static List<CanFrameHandler> Handlers { get; set; }
-        public CanFrameHandler()
+        internal static List<CanFrameHandler> AllHandlers { get; set; }
+        static CanFrameHandler()
         {
-            Handlers = new List<CanFrameHandler>();
+            AllHandlers = new List<CanFrameHandler>();
             Thread ValidnessCheckThread = new Thread(new ThreadStart(LastFrameValidnessCheckJob));
             ValidnessCheckThread.IsBackground = true;
             ValidnessCheckThread.Start();
@@ -110,8 +117,11 @@ namespace Communications.Can
 
         public void Dispose()
         {
-            lock (Handlers)
-                Handlers.Remove(this);
+            foreach (var p in OnPorts)
+                p.RemoveHandler(this);
+
+            lock (AllHandlers)
+                AllHandlers.Remove(this);
         }
     }
 }

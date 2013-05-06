@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Collections.Concurrent;
+using System.Collections.ObjectModel;
 
 namespace Communications.Can
 {
@@ -28,7 +29,8 @@ namespace Communications.Can
         {
             this.GenerateLoopbackEcho = true;
             this.Name = PortName;
-            Handlers = new ConcurrentBag<CanFrameHandler>();
+            _Handlers = new List<CanFrameHandler>();
+            Handlers = new ReadOnlyCollection<CanFrameHandler>(_Handlers);
         }
 
         #region Отправка сообщений
@@ -73,9 +75,12 @@ namespace Communications.Can
         {
             if (Frames.Any() && Recieved != null) Recieved(this, new CanFramesReceiveEventArgs(Frames, this));
 
-            foreach (var d in Frames.GroupBy(f => f.Descriptor))
-                foreach (var h in Handlers.Where(hh => hh.Descriptor == d.Key))
-                    h.OnRecieved(d.ToList(), this);
+            lock (_Handlers)
+            {
+                foreach (var d in Frames.GroupBy(f => f.Descriptor))
+                    foreach (var h in _Handlers.Where(hh => hh.Descriptor == d.Key))
+                        h.OnRecieved(d.ToList(), this);
+            }
         }
         /// <summary>
         /// Обработка одного принятого фрейма
@@ -86,7 +91,37 @@ namespace Communications.Can
             OnFramesRecieved(new List<CanFrame>() { Frame });
         }
 
-        public ConcurrentBag<CanFrameHandler> Handlers { get; private set; }
+        private List<CanFrameHandler> _Handlers { get; set; }
+        /// <summary>
+        /// Список хендлеров фреймов, установленных на данном порту
+        /// </summary>
+        public ReadOnlyCollection<CanFrameHandler> Handlers { get; private set; }
+
+        /// <summary>
+        /// Устанавливает хендлер фреймов с заданным дескриптором на этот порт
+        /// </summary>
+        public void AddHandler(CanFrameHandler h)
+        {
+            lock (_Handlers)
+            {
+                if (h.OnPorts.Contains(this))
+                    h.OnPorts.Add(this);
+
+                if (!_Handlers.Contains(h))
+                    _Handlers.Add(h);
+            }
+        }
+        /// <summary>
+        /// Убирает хендлер для заданного дескриптора
+        /// </summary>
+        public void RemoveHandler(CanFrameHandler h)
+        {
+            lock (_Handlers)
+            {
+                h.OnPorts.Remove(this);
+                _Handlers.Remove(h);
+            }
+        }
 
         public override string ToString()
         {
@@ -103,6 +138,7 @@ namespace Communications.Can
         public CanFramesReceiveEventArgs(IList<CanFrame> Frames, CanPort Port)
         {
             this.Frames = Frames;
+            this.Port = Port;
         }
     }
 }
