@@ -1,0 +1,8 @@
+﻿<Window x:Class="CanLighthouse.WatchWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="WatchWindow" Height="302" Width="427">
+    <Grid>
+        
+    </Grid>
+</Window>

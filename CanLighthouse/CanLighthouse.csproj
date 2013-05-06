@@ -55,6 +55,8 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Describing\FrameDescription.cs" />
+    <Compile Include="Describing\ProtocolDescription.cs" />
     <Compile Include="Models\FilterModel.cs" />
     <Compile Include="Models\FrameModel.cs" />
     <Compile Include="Models\SendingModel.cs" />
@@ -64,6 +66,9 @@
     </Compile>
     <Compile Include="SniffWindow.xaml.cs">
       <DependentUpon>SniffWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="WatchWindow.xaml.cs">
+      <DependentUpon>WatchWindow.xaml</DependentUpon>
     </Compile>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -82,6 +87,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="SniffWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="WatchWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -104,10 +113,10 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <Content Include="Default.chl">
+    <None Include="Default.xpd">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <SubType>Designer</SubType>
-    </Content>
+    </None>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>

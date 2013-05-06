@@ -54,7 +54,7 @@ namespace CanLighthouse
             };
         }
 
-        private SendDelay ParseSendDelayFromString(String str)
+        private TimeSpan? ParseSendDelayFromString(String str)
         {
             Regex regex = new Regex(DelayPattern);
             Match match = regex.Match(str);
@@ -68,7 +68,7 @@ namespace CanLighthouse
                 default: delay = TimeSpan.FromMilliseconds(Double.Parse(match.Groups["count"].Value, System.Globalization.CultureInfo.InvariantCulture));
                     break;
             }
-            return new SendDelay() { Duration = delay };
+            return delay;
 
         }
 
@@ -117,30 +117,34 @@ namespace CanLighthouse
         {
             Port.Send(Frames.Select(fm => fm.GetFrame()).ToList());
         }
+        private void DoSendOperation(SendOperation op)
+        {
+            SendFrames(op.PushingFrames);
+            System.Threading.Thread.Sleep(op.DelayAfter);
+        }
 
-        private void ParseAll(string ParseText)
+        private IList<SendOperation> ParseAll(string ParseText)
         {
             Regex regex = new Regex(FramePattern);
             var matches = regex.Matches(ParseText);
 
             var lines = ParseText.Split(new Char[] { '\n' }).ToList();
-            var Operations = lines.Aggregate(new List<SendOperation>(),
+            var Operations = lines.Aggregate(new List<SendOperation>() { new SendOperation() },
                                 (seed, l) =>
                                 {
-                                    FrameModel frame;
-                                    SendDelay delay;
+                                    FrameModel frame; TimeSpan? delay;
                                     if ((frame = ParseFrameString(l)) != null)
                                     {
-                                        if (seed.LastOrDefault() is SendPushing)
-                                            (seed.Last() as SendPushing).PushingFrames.Add(frame);
-                                        else seed.Add(new SendPushing() { PushingFrames = new List<FrameModel>() { frame } });
+                                        seed.Last().PushingFrames.Add(frame);
                                     }
                                     else if ((delay = ParseSendDelayFromString(l)) != null)
                                     {
-                                        seed.Add(delay);
+                                        seed.Last().DelayAfter = delay.Value;
+                                        seed.Add(new SendOperation());
                                     }
                                     return seed;
                                 });
+            return Operations;
         }
 
 
@@ -157,10 +161,13 @@ namespace CanLighthouse
         {
             e.CanExecute = true;
         }
-
         private void SendAllCommand_Executed(object sender, ExecutedRoutedEventArgs e)
         {
-            ParseAll(SendEdit.Text);
+            var ops = ParseAll(SendEdit.Text);
+            var t0 = new System.Threading.Tasks.Task(() => { });
+            ops.Aggregate(t0,
+                (seed, op) => seed.ContinueWith(t => DoSendOperation(op)));
+            t0.Start();
         }
     }
 

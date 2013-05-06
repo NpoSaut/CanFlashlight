@@ -6,17 +6,15 @@ using CanLighthouse.Models;
 
 namespace CanLighthouse
 {
-    public abstract class SendOperation
-    {
-    }
-
-    public class SendPushing : SendOperation
+    public class SendOperation
     {
         public IList<FrameModel> PushingFrames { get; set; }
-    }
+        public TimeSpan DelayAfter { get; set; }
 
-    public class SendDelay : SendOperation
-    {
-        public TimeSpan Duration { get; set; }
+        public SendOperation()
+        {
+            PushingFrames = new List<FrameModel>();
+            DelayAfter = TimeSpan.Zero;
+        }
     }
 }

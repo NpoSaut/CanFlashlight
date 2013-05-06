@@ -5,6 +5,7 @@ using System.Text;
 using System.ComponentModel;
 using Communications.Can;
 using System.Text.RegularExpressions;
+using CanLighthouse.Describing;
 
 namespace CanLighthouse.Models
 {
@@ -19,6 +20,23 @@ namespace CanLighthouse.Models
         public CanFrame BasedOn { get; private set; }
 
         public DateTime RecieveTime { get; private set; }
+
+        private String _FrameName;
+        /// <summary>
+        /// Название кадра
+        /// </summary>
+        public String FrameName
+        {
+            get { return _FrameName; }
+            set
+            {
+                if (_FrameName != value)
+                {
+                    _FrameName = value;
+                    OnPropertyChanged("FrameName");
+                }
+            }
+        }
 
         private UInt16 _Descriptor;
         /// <summary>
@@ -153,6 +171,13 @@ namespace CanLighthouse.Models
             Id = (UInt16)OnFrame.Id;
             RecieveTime = DateTime.Now;
             Data = OnFrame.Data.ToArray();
+            FindDescription();
+        }
+        public void FindDescription()
+        {
+            var pd = (App.Current as App).Protocol;
+            if (pd.FrameDescriptions.ContainsKey(this.Descriptor))
+                this.FrameName = pd.FrameDescriptions[this.Descriptor].Name;
         }
 
         public CanFrame GetFrame()

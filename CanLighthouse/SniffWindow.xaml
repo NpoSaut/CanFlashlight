@@ -33,7 +33,8 @@
                 <DataGridTextColumn Header="ID" Binding="{Binding Id}" Visibility="Collapsed" />
                 <DataGridTextColumn Header="Дескр" Binding="{Binding Descriptor, StringFormat=X4}" />
                 <DataGridTextColumn Header="Данные" Binding="{Binding HexString}" />
-                <DataGridTextColumn Header="Двоичные" Binding="{Binding BinaryString}" />
+                <DataGridTextColumn Header="Двоичные" Binding="{Binding BinaryString}" Visibility="Collapsed" />
+                <DataGridTextColumn Header="Название" Binding="{Binding FrameName}" />
             </DataGrid.Columns>
         </DataGrid>
         

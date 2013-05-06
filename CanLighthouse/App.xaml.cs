@@ -7,6 +7,7 @@ using System.Windows;
 using Communications.Appi;
 using System.Collections.ObjectModel;
 using Communications.Can;
+using CanLighthouse.Describing;
 
 namespace CanLighthouse
 {
@@ -19,6 +20,8 @@ namespace CanLighthouse
         private ObservableCollection<AppiDeviceSlot> AppiDeviceSlots { get; set; }
         public ObservableCollection<CanPort> Ports { get; private set; }
 
+        public ProtocolDescription Protocol { get; set; }
+
         private void Application_Startup(object sender, StartupEventArgs e)
         {
             AppiDeviceSlots = new ObservableCollection<AppiDeviceSlot>(
@@ -29,6 +32,9 @@ namespace CanLighthouse
             Ports = new ObservableCollection<CanPort>();
             foreach (var ds in AppiDeviceSlots)
                 AppiDevices.Add(ds.OpenDevice(true));
+
+            Protocol = ProtocolDescription.Load("Default.xpd");
+            Protocol.FillupResource(this.Resources);
         }
 
         void AppiDevices_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)

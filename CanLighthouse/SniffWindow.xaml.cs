@@ -18,6 +18,7 @@ using Communications.Can;
 using System.Xml.Linq;
 using System.Collections.Specialized;
 using System.Collections.Concurrent;
+using CanLighthouse.Describing;
 
 namespace CanLighthouse
 {
@@ -26,7 +27,7 @@ namespace CanLighthouse
     /// </summary>
     public partial class SniffWindow : Window
     {
-        private const int CutOffCount = 100;
+        private const int CutOffCount = 10000;
         public ObservableCollection<FrameModel> Frames { get; private set; }
         public ListCollectionView FramesCV { get; set; }
         public List<UInt16> Filters { get; private set; }
@@ -58,8 +59,6 @@ namespace CanLighthouse
 
             InitializeComponent();
 
-            LoadColorScheme("Default.chl");
-
             ListeningPorts = new ObservableCollection<CanPort>();
             ListeningPorts.CollectionChanged += new NotifyCollectionChangedEventHandler(ListeningPorts_CollectionChanged);
             foreach (var lp in OnPorts) ListeningPorts.Add(lp);
@@ -82,23 +81,6 @@ namespace CanLighthouse
         {
             //if (e.NewItems != null)
             //    LogGrid.ScrollIntoView(e.NewItems[e.NewItems.Count - 1]);
-        }
-
-        private void LoadColorScheme(String FileName)
-        {
-            var Highlights = XDocument.Load(FileName).Root
-                                .Elements("highlight")
-                                .Select(hl =>
-                                    new
-                                    {
-                                        desc = hl.Attribute("descriptor").Value,
-                                        Brush = new SolidColorBrush((Color)ColorConverter.ConvertFromString(hl.Attribute("color").Value))
-                                    });
-            foreach (var hl in Highlights)
-            {
-                this.Resources.Add(string.Format("Brush{0}", hl.desc), hl.Brush);
-                HighlightBrushes.Add(hl.Brush);
-            }
         }
 
         private bool FrameFilter(object fo)
@@ -124,8 +106,9 @@ namespace CanLighthouse
         private ConcurrentQueue<FrameModel> FramesToInterfaceBuffer = new ConcurrentQueue<FrameModel>();
         private void SyncronizeFramesOutput()
         {
-            //for (int i = 0; i < Frames.Count + FramesToInterfaceBuffer.Count - CutOffCount; i++)
-            //    Frames.RemoveAt(0);
+            for (int i = 0; i < Frames.Count + FramesToInterfaceBuffer.Count - CutOffCount; i++)
+                Frames.RemoveAt(0);
+
             this.Title = string.Join("", Enumerable.Repeat('.', FramesToInterfaceBuffer.Count));
             FrameModel f;
             while (FramesToInterfaceBuffer.TryDequeue(out f))
@@ -169,12 +152,8 @@ namespace CanLighthouse
             }
             else return 0;
         }
-        private string GetResourceNameForDescriptor(uint descriptor)
-        {
-            return string.Format("Brush{0:X4}", descriptor);
-        }
 
-        private uint GetEditingDescriptor()
+        private int GetEditingDescriptor()
         {
             string line = FiltersEdit.GetLineText(FiltersEdit.GetLineIndexFromCharacterIndex(FiltersEdit.SelectionStart));
             return GetDescriptor(line ?? "");
@@ -183,7 +162,7 @@ namespace CanLighthouse
         private void FiltersEdit_SelectionChanged(object sender, RoutedEventArgs e)
         {
             var descr = GetEditingDescriptor();
-            var brush = TryFindResource(GetResourceNameForDescriptor(descr));
+            var brush = TryFindResource(ProtocolDescription.GetBrushResourceNameForDescriptor(descr));
             ColorPicker.SelectedItem = brush;
         }
 
@@ -192,7 +171,7 @@ namespace CanLighthouse
             var SetBrush = (Brush)(sender as ComboBox).SelectedItem;
 
             var des = GetEditingDescriptor();
-            var resourceKey = GetResourceNameForDescriptor(des);
+            var resourceKey = ProtocolDescription.GetBrushResourceNameForDescriptor(des);
             if (!Resources.Contains(resourceKey)) Resources.Add(resourceKey, SetBrush);
             else Resources[resourceKey] = SetBrush;
         }
@@ -200,7 +179,7 @@ namespace CanLighthouse
         private void LogGrid_LoadingRow(object sender, DataGridRowEventArgs e)
         {
             var frame = e.Row.DataContext as FrameModel;
-            e.Row.SetResourceReference(Control.ForegroundProperty, GetResourceNameForDescriptor(frame.Descriptor));
+            e.Row.SetResourceReference(Control.ForegroundProperty, ProtocolDescription.GetBrushResourceNameForDescriptor(frame.Descriptor));
         }
     }
 }
