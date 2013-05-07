@@ -31,16 +31,16 @@ namespace CanLighthouse.Models
             if (Handler != null)
                 Deinitialize();
 
-            this.Handler = new CanFrameHandler(this.Descriptor);
-            Port.AddHandler(this.Handler);
-            Handler.Recieved += Handler_Recieved;
+            //this.Handler = new CanFrameHandler(this.Descriptor);
+            //Port.AddHandler(this.Handler);
+            //Handler.Recieved += Handler_Recieved;
         }
         public void Deinitialize()
         {
-            Port.RemoveHandler(Handler);
-            Handler.Recieved -= Handler_Recieved;
-            Handler.Dispose();
-            LastFrame = null;
+            //Port.RemoveHandler(Handler);
+            //Handler.Recieved -= Handler_Recieved;
+            //Handler.Dispose();
+            //LastFrame = null;
         }
 
         void Handler_LastFrameValidChanged(object sender, EventArgs e)

@@ -42,6 +42,7 @@
   <ItemGroup>
     <Compile Include="CanFrame.cs" />
     <Compile Include="CanFrameHandler.cs" />
+    <Compile Include="CanFramesBuffer.cs" />
     <Compile Include="CanPort.cs" />
     <Compile Include="LogReader\LogReaderPort.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

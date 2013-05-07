@@ -29,8 +29,6 @@ namespace Communications.Can
         {
             this.GenerateLoopbackEcho = true;
             this.Name = PortName;
-            _Handlers = new List<CanFrameHandler>();
-            Handlers = new ReadOnlyCollection<CanFrameHandler>(_Handlers);
         }
 
         #region Отправка сообщений
@@ -73,13 +71,16 @@ namespace Communications.Can
         /// <param name="Frames">Принятые фреймы</param>
         protected void OnFramesRecieved(IList<CanFrame> Frames)
         {
-            if (Frames.Any() && Recieved != null) Recieved(this, new CanFramesReceiveEventArgs(Frames, this));
-
-            lock (_Handlers)
+            if (Frames.Any())
             {
-                foreach (var d in Frames.GroupBy(f => f.Descriptor))
-                    foreach (var h in _Handlers.Where(hh => hh.Descriptor == d.Key))
-                        h.OnRecieved(d.ToList(), this);
+                if (Recieved != null) Recieved(this, new CanFramesReceiveEventArgs(Frames, this));
+
+                lock (_Handlers)
+                {
+                    foreach (var d in Frames.GroupBy(f => f.Descriptor))
+                        foreach (var h in _Handlers.Where(hh => hh.Descriptor == d.Key))
+                            h.OnRecieved(d.ToList());
+                }
             }
         }
         /// <summary>
@@ -91,36 +92,15 @@ namespace Communications.Can
             OnFramesRecieved(new List<CanFrame>() { Frame });
         }
 
-        private List<CanFrameHandler> _Handlers { get; set; }
-        /// <summary>
-        /// Список хендлеров фреймов, установленных на данном порту
-        /// </summary>
-        public ReadOnlyCollection<CanFrameHandler> Handlers { get; private set; }
-
-        /// <summary>
-        /// Устанавливает хендлер фреймов с заданным дескриптором на этот порт
-        /// </summary>
-        public void AddHandler(CanFrameHandler h)
+        private List<CanFrameHandler> _Handlers = new List<CanFrameHandler>();
+        public ReadOnlyCollection<CanFrameHandler> Handlers { get { return _Handlers.ToList().AsReadOnly(); } }
+        internal void Handle(CanFrameHandler h)
         {
-            lock (_Handlers)
-            {
-                if (h.OnPorts.Contains(this))
-                    h.OnPorts.Add(this);
-
-                if (!_Handlers.Contains(h))
-                    _Handlers.Add(h);
-            }
+            lock (_Handlers) _Handlers.Add(h);
         }
-        /// <summary>
-        /// Убирает хендлер для заданного дескриптора
-        /// </summary>
-        public void RemoveHandler(CanFrameHandler h)
+        internal void Unandle(CanFrameHandler h)
         {
-            lock (_Handlers)
-            {
-                h.OnPorts.Remove(this);
-                _Handlers.Remove(h);
-            }
+            lock (_Handlers) _Handlers.Remove(h);
         }
 
         public override string ToString()

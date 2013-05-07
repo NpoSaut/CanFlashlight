@@ -24,22 +24,22 @@ namespace Communications.Protocols.IsoTP
 
         public Byte[] Recieve()
         {
-            using (var CanHandler = new CanFrameHandler(Descriptor))
-            {
-                CanFrame f;
-                while (IsoTpFrame.GetFrameType((f = CanHandler.WaitFor()).Data) != IsoTpFrameType.First) { }
+            //using (var CanHandler = new CanFrameHandler(Descriptor))
+            //{
+            //    CanFrame f;
+            //    while (IsoTpFrame.GetFrameType((f = CanHandler.WaitFor()).Data) != IsoTpFrameType.First) { }
 
-                var First = IsoTpFrame.ParsePacket<FirstFrame>(f.Data);
-                Buff = new Byte[First.PacketSize];
-                Buffer.BlockCopy(First.Data, 0, Buff, 0, First.Data.Length);
-                Pointer += First.Data.Length;
+            //    var First = IsoTpFrame.ParsePacket<FirstFrame>(f.Data);
+            //    Buff = new Byte[First.PacketSize];
+            //    Buffer.BlockCopy(First.Data, 0, Buff, 0, First.Data.Length);
+            //    Pointer += First.Data.Length;
 
-                var FlowControl = new FlowControlFrame(FlowControlFlag.ClearToSend, BlockSize, SeparationTime);
-                Port.Send(FlowControl.GetCanFrame(Descriptor));
+            //    var FlowControl = new FlowControlFrame(FlowControlFlag.ClearToSend, BlockSize, SeparationTime);
+            //    Port.Send(FlowControl.GetCanFrame(Descriptor));
 
 
 
-            }
+            //}
             return Buff;
         }
     }

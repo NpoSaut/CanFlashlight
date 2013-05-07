@@ -4,68 +4,58 @@ using System.Linq;
 using System.Text;
 using System.Collections.Concurrent;
 using System.Threading;
+using System.Collections.ObjectModel;
 
 namespace Communications.Can
 {
+    /// <summary>
+    /// Хэндлер CAN-фреймов
+    /// </summary>
+    /// <remarks>
+    /// Используется для оптимизации обработки CAN-сообщений: позволяет реагировать только на сообщения с определённым дескриптором
+    /// </remarks>
     public class CanFrameHandler : IDisposable
     {
-        public int Descriptor { get; set; }
-        internal List<CanPort> OnPorts;
+        /// <summary>
+        /// Отлавливаемый дескриптор
+        /// </summary>
+        public int Descriptor { get; private set; }
+        /// <summary>
+        /// Прослушиваемый порт
+        /// </summary>
+        public CanPort Port { get; private set; }
 
+        /// <summary>
+        /// Событие, возникающее при приёме сообщений с заданным дескриптором
+        /// </summary>
         public event CanFramesReceiveEventHandler Recieved;
 
-        public CanFrameHandler(int Descriptor)
+        /// <summary>
+        /// Устанавливает отслеживание сообщений с заданным дескприптором по указанному порту
+        /// </summary>
+        /// <param name="Port">Прослушиваемый порт</param>
+        /// <param name="Descriptor">Отлавливаемый дескриптор</param>
+        public CanFrameHandler(CanPort Port, int Descriptor)
         {
+            this.Port = Port;
             this.Descriptor = Descriptor;
-            this.OnPorts = new List<CanPort>();
 
-            lock (AllHandlers)
-                AllHandlers.Add(this);
+            Port.Handle(this);
         }
 
-        internal void OnRecieved(IList<CanFrame> Frames, CanPort FromPort)
+        /// <summary>
+        /// Инициирует обработку событий приёма сообщений
+        /// </summary>
+        /// <param name="Frames">Принятые кадры</param>
+        internal void OnRecieved(IList<CanFrame> Frames)
         {
-            if (Recieved != null) Recieved(this, new CanFramesReceiveEventArgs(Frames, FromPort));
-
-            lock (WaitLocker)
-            {
-                if (IsWaiting)
-                {
-                    PendingFrame = Frames.First();
-                    IsWaiting = false;
-                }
-            }
-        }
-
-        private Boolean IsWaiting { get; set; }
-        private object WaitLocker = new object();
-        private CanFrame PendingFrame;
-
-        public CanFrame WaitFor()
-        {
-            IsWaiting = true;
-            bool w = IsWaiting;
-            while (w)
-            {
-                lock (WaitLocker)
-                { w = IsWaiting; }
-            }
-            return PendingFrame;
-        }
-
-        internal static List<CanFrameHandler> AllHandlers { get; set; }
-        static CanFrameHandler()
-        {
-            AllHandlers = new List<CanFrameHandler>();
+            if (Recieved != null)
+                Recieved(this, new CanFramesReceiveEventArgs(Frames, Port));
         }
 
         public void Dispose()
         {
-            foreach (var p in OnPorts)
-                p.RemoveHandler(this);
-
-            lock (AllHandlers)
-                AllHandlers.Remove(this);
+            Port.Unandle(this);
         }
     }
 }
