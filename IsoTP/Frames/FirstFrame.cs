@@ -5,9 +5,21 @@ using System.Text;
 
 namespace Communications.Protocols.IsoTP.Frames
 {
+    /// <summary>
+    /// Первый кадр транзакции
+    /// </summary>
+    /// <remarks>
+    /// Этим кадром инициируется транзакция
+    /// </remarks>
     public class FirstFrame : IsoTpFrame
     {
+        /// <summary>
+        /// Размер полного пакета
+        /// </summary>
         public int PacketSize { get; private set; }
+        /// <summary>
+        /// Данные
+        /// </summary>
         public Byte[] Data { get; private set; }
 
         public override IsoTpFrameType FrameType
@@ -22,7 +34,7 @@ namespace Communications.Protocols.IsoTP.Frames
             this.Data = Data;
             this.PacketSize = PacketSize;
         }
-        internal FirstFrame()
+        public FirstFrame()
         {
         }
 

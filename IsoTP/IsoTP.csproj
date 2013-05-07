@@ -42,10 +42,14 @@
   <ItemGroup>
     <Compile Include="Frames\ConsecutiveFrame.cs" />
     <Compile Include="Frames\FirstFrame.cs" />
+    <Compile Include="Frames\FlowControlFrame.cs" />
     <Compile Include="Frames\SingleFrame.cs" />
-    <Compile Include="IsoTpFrame.cs" />
+    <Compile Include="Frames\IsoTpFrame.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TpPacket.cs" />
+    <Compile Include="TpRecieveTransaction.cs" />
+    <Compile Include="TpSendTransaction.cs" />
+    <Compile Include="TpTransaction.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CanLine\CanLine.csproj">

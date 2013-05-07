@@ -5,9 +5,21 @@ using System.Text;
 
 namespace Communications.Protocols.IsoTP.Frames
 {
+    /// <summary>
+    /// Последовательный кадр
+    /// </summary>
+    /// <remarks>
+    /// Кадр, несущий передающий основную часть информации
+    /// </remarks>
     public class ConsecutiveFrame : IsoTpFrame
     {
+        /// <summary>
+        /// Данные кадра
+        /// </summary>
         public Byte[] Data { get; private set; }
+        /// <summary>
+        /// Порядковый номер кадра
+        /// </summary>
         public int Index { get; private set; }
 
         public override IsoTpFrameType FrameType
@@ -20,7 +32,10 @@ namespace Communications.Protocols.IsoTP.Frames
         }
         public ConsecutiveFrame(Byte[] Data, int Index)
         {
-            if (Data.Length > )
+            if (Data.Length > 7) throw new ArgumentOutOfRangeException("Data", "Размер данных, передаваемых в каждом Consecutive режиме ограничен 7 байтами");
+
+            this.Data = Data;
+            this.Index = Index;
         }
 
         public override Can.CanFrame GetCanFrame(int WithDescriptor)
