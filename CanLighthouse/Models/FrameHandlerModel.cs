@@ -34,25 +34,21 @@ namespace CanLighthouse.Models
             this.Handler = new CanFrameHandler(this.Descriptor);
             Port.AddHandler(this.Handler);
             Handler.Recieved += Handler_Recieved;
-            Handler.LastFrameValidChanged += Handler_LastFrameValidChanged;
         }
         public void Deinitialize()
         {
             Port.RemoveHandler(Handler);
             Handler.Recieved -= Handler_Recieved;
-            Handler.LastFrameValidChanged -= Handler_LastFrameValidChanged;
             Handler.Dispose();
             LastFrame = null;
         }
 
         void Handler_LastFrameValidChanged(object sender, EventArgs e)
         {
-            this.LastDataValid = Handler.LastFrameValid;
         }
 
         void Handler_Recieved(object sender, CanFramesReceiveEventArgs e)
         {
-            this.LastFrame = new FrameModel(Handler.LastFrame);
         }
 
         private FrameModel _LastFrame;
@@ -89,20 +85,5 @@ namespace CanLighthouse.Models
             }
         }
 
-        /// <summary>
-        /// Время актуальности последнего значения
-        /// </summary>
-        public TimeSpan LastValueValidnessTime
-        {
-            get { return Handler.ValueValidnessTime; }
-            set
-            {
-                if (Handler.ValueValidnessTime != value)
-                {
-                    Handler.ValueValidnessTime = value;
-                    OnPropertyChanged("LastValueValidnessTime");
-                }
-            }
-        }
     }
 }
