@@ -14,6 +14,10 @@ namespace Communications.Protocols.IsoTP.Frames
     public class ConsecutiveFrame : IsoTpFrame
     {
         /// <summary>
+        /// Вместимость пакета
+        /// </summary>
+        public const int DataCapacity = 7;
+        /// <summary>
         /// Данные кадра
         /// </summary>
         public Byte[] Data { get; private set; }
@@ -27,12 +31,12 @@ namespace Communications.Protocols.IsoTP.Frames
             get { return IsoTpFrameType.Consecutive; }
         }
 
-        internal ConsecutiveFrame()
+        public ConsecutiveFrame()
         {
         }
         public ConsecutiveFrame(Byte[] Data, int Index)
         {
-            if (Data.Length > 7) throw new ArgumentOutOfRangeException("Data", "Размер данных, передаваемых в каждом Consecutive режиме ограничен 7 байтами");
+            if (Data.Length > DataCapacity) throw new ArgumentOutOfRangeException("Data", string.Format("Размер данных, передаваемых в каждом Consecutive режиме ограничен {0} байтами", DataCapacity));
 
             this.Data = Data;
             this.Index = Index;
@@ -43,7 +47,7 @@ namespace Communications.Protocols.IsoTP.Frames
             Byte[] buff = new Byte[8];
 
             buff[0] = (byte)(((byte)FrameType & 0x0f) | (Index & 0x0f) << 4);
-            Buffer.BlockCopy(Data, 0, buff, 1, 7);
+            Buffer.BlockCopy(Data, 0, buff, 1, DataCapacity);
 
             return Can.CanFrame.NewWithDescriptor(WithDescriptor, buff);
         }
@@ -52,8 +56,13 @@ namespace Communications.Protocols.IsoTP.Frames
         {
             this.Index = (buff[0] & 0xf0) >> 4;
 
-            Data = new Byte[8];
-            Buffer.BlockCopy(buff, 1, Data, 0, 7);
+            Data = new Byte[DataCapacity];
+            Buffer.BlockCopy(buff, 1, Data, 0, DataCapacity);
+        }
+
+        public static implicit operator ConsecutiveFrame(Communications.Can.CanFrame cFrame)
+        {
+            return IsoTpFrame.ParsePacket<ConsecutiveFrame>(cFrame.Data);
         }
     }
 }

@@ -14,6 +14,11 @@ namespace Communications.Protocols.IsoTP.Frames
     /// </remarks>
     public class SingleFrame : IsoTpFrame
     {
+        /// <summary>
+        /// Вместимость пакета
+        /// </summary>
+        public const int DataCapacity = 7;
+
         public Byte[] Data { get; private set; }
 
         public override IsoTpFrameType FrameType
@@ -24,11 +29,11 @@ namespace Communications.Protocols.IsoTP.Frames
         public SingleFrame(Byte[] Data)
         {
             if (Data == null) throw new ArgumentNullException("Data");
-            if (Data.Length > 7) throw new ArgumentOutOfRangeException("Data", "Размер данных, передаваемых в Single Frame режиме ограничен 7 байтами");
+            if (Data.Length > DataCapacity) throw new ArgumentOutOfRangeException("Data", string.Format("Размер данных, передаваемых в Single Frame режиме ограничен {0} байтами", DataCapacity));
 
             this.Data = Data;
         }
-        internal SingleFrame()
+        public SingleFrame()
         {
         }
 
@@ -48,6 +53,11 @@ namespace Communications.Protocols.IsoTP.Frames
 
             Data = new Byte[len];
             Buffer.BlockCopy(buff, 1, Data, 0, len);
+        }
+
+        public static implicit operator SingleFrame(Communications.Can.CanFrame cFrame)
+        {
+            return IsoTpFrame.ParsePacket<SingleFrame>(cFrame.Data);
         }
     }
 }

@@ -6,7 +6,7 @@ using Communications.Can;
 
 namespace Communications.Protocols.IsoTP.Frames
 {
-    public enum IsoTpFrameType : byte { Single = 0x0, First = 0x1, Consecutive = 0x2, FlowControl = 0x3 }
+    public enum IsoTpFrameType : byte { Single = 0x0, First = 0x1, Consecutive = 0x2, FlowControl = 0x3, Invalid = 0xff }
 
     /// <summary>
     /// Базовый класс для кадров ISO-TP
@@ -45,7 +45,30 @@ namespace Communications.Protocols.IsoTP.Frames
         /// </summary>
         public static IsoTpFrameType GetFrameType(Byte[] buff)
         {
-            return (IsoTpFrameType)(buff[0] >> 4);
+            var TypeCode = buff[0] & 0x0f;
+            if (TypeCode > 0x3) return IsoTpFrameType.Invalid;
+            else return (IsoTpFrameType)(TypeCode);
+        }
+    }
+
+    public static class IsoTpFramesHelper
+    {
+        /// <summary>
+        /// Возвращает тип пакета ISO-TP
+        /// </summary>
+        public static IsoTpFrameType GetIsoTpFrameType(this CanFrame Frame)
+        {
+            return IsoTpFrame.GetFrameType(Frame.Data);
+        }
+        /// <summary>
+        /// Выполняет парсинг ISO-TP фрейма из CAN-сообщения
+        /// </summary>
+        /// <typeparam name="FrameType">Тип ISO-TP фрейма</typeparam>
+        /// <param name="Frame">CAN-сообщение</param>
+        public static FrameType ParseAs<FrameType>(this CanFrame Frame)
+            where FrameType : IsoTpFrame, new ()
+        {
+            return IsoTpFrame.ParsePacket<FrameType>(Frame.Data);
         }
     }
 }

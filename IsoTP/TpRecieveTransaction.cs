@@ -9,8 +9,18 @@ namespace Communications.Protocols.IsoTP
 {
     public class TpRecieveTransaction : TpTransaction
     {
+        /// <summary>
+        /// Буфер приёма пакета
+        /// </summary>
         private Byte[] Buff { get; set; }
+        /// <summary>
+        /// Указатель на место, в которое осуществляется приём пакета
+        /// </summary>
         private int Pointer { get; set; }
+        /// <summary>
+        /// Ожидаемый последовательный номер пакета
+        /// </summary>
+        private int ExpectingConsIndex { get; set; }
 
         public TimeSpan SeparationTime { get; set; }
         public Byte BlockSize { get; set; }
@@ -24,23 +34,81 @@ namespace Communications.Protocols.IsoTP
 
         public Byte[] Recieve()
         {
-            //using (var CanHandler = new CanFrameHandler(Descriptor))
-            //{
-            //    CanFrame f;
-            //    while (IsoTpFrame.GetFrameType((f = CanHandler.WaitFor()).Data) != IsoTpFrameType.First) { }
+            if (this.Status != TpTransactionStatus.Ready) throw new IsoTpTransactionReuseException(this);
+            this.Status = TpTransactionStatus.Active;
 
-            //    var First = IsoTpFrame.ParsePacket<FirstFrame>(f.Data);
-            //    Buff = new Byte[First.PacketSize];
-            //    Buffer.BlockCopy(First.Data, 0, Buff, 0, First.Data.Length);
-            //    Pointer += First.Data.Length;
+            using (var FramesReader = new CanFramesBuffer(Descriptor, Port))
+            {
+                // Инициализируем чтение с заданным таймаутом,
+                // при истечении таймаута - выбрасываем ошибку.
+                var FramesStream = FramesReader.Read(Timeout, true);
 
-            //    var FlowControl = new FlowControlFrame(FlowControlFlag.ClearToSend, BlockSize, SeparationTime);
-            //    Port.Send(FlowControl.GetCanFrame(Descriptor));
+                try
+                {
+                    // Ждём первого кадра передачи
+                    var First = FramesStream
+                                    .Where(f => f.GetIsoTpFrameType() == IsoTpFrameType.First)
+                                    //.Cast<FirstFrame>()
+                                    .Select(f => (FirstFrame)f)
+                                    .First();
 
+                    // После того, как поймали первый кадр - подготавливаем буфер
+                    Buff = new Byte[First.PacketSize];
+                    Buffer.BlockCopy(First.Data, 0, Buff, 0, First.Data.Length);
+                    Pointer += First.Data.Length;
 
+                    ExpectingConsIndex = 1;
 
-            //}
+                    // Сообщаем о готовности
+                    SendFlowControl();
+
+                    // Начинаем приём данных
+                    while (Pointer < Buff.Length)
+                    {
+                        ReadBlock(FramesStream);    // Читаем следующий блок
+                        SendFlowControl();          // Отправляем контрольный пакет
+                    }
+                }
+                catch
+                {
+                    // При любой ошибке отправляем пакет отмены передачи
+                    this.Status = TpTransactionStatus.Error;
+                    Port.Send(FlowControlFrame.AbortFrame.GetCanFrame(Descriptor));
+                    throw;      // и пробрасываем ошибку дальше по стеку
+                }
+            }
+
+            this.Status = TpTransactionStatus.Done;
             return Buff;
+        }
+
+        private void ReadBlock(IEnumerable<CanFrame> FromStream)
+        {
+            var Consequence = FromStream
+                    .Where(f => f.GetIsoTpFrameType() == IsoTpFrameType.Consecutive)
+                    //.Cast<ConsecutiveFrame>()
+                    .Select(f => (ConsecutiveFrame)f)
+                    .Take(BlockSize);
+
+            foreach (var cf in Consequence)
+            {
+                if (cf.Index != ExpectingConsIndex) throw new IsoTpSequenceException(ExpectingConsIndex, cf.Index);
+
+                int DataLength = Math.Min(cf.Data.Length, Buff.Length - Pointer);
+                Buffer.BlockCopy(cf.Data, 0, Buff, Pointer, DataLength);
+                Pointer += cf.Data.Length;
+                ExpectingConsIndex = (ExpectingConsIndex + 1) & 0x0f;
+
+                if (Pointer >= Buff.Length) break;
+            }
+        }
+        private void SendFlowControl()
+        {
+            Port.Send(GenerateFlowControl().GetCanFrame(Descriptor));
+        }
+        private FlowControlFrame GenerateFlowControl()
+        {
+            return new FlowControlFrame(FlowControlFlag.ClearToSend, BlockSize, SeparationTime);
         }
     }
 }

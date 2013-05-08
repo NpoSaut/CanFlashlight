@@ -51,7 +51,7 @@ namespace Communications.Protocols.IsoTP.Frames
         /// </summary>
         public TimeSpan SeparationTime { get; private set; }
 
-        internal FlowControlFrame()
+        public FlowControlFrame()
         {
         }
         public FlowControlFrame(FlowControlFlag Flag, Byte BlockSize, Byte SeparationTimeCode)
@@ -96,9 +96,22 @@ namespace Communications.Protocols.IsoTP.Frames
 
         protected override void FillWithBytes(byte[] buff)
         {
-            this.Flag = (FlowControlFlag)(buff[0] & 0x0f);
+            this.Flag = (FlowControlFlag)(buff[0] >> 4);
             this.BlockSize = buff[1];
             this.SeparationTime = SeparationTimeFromCode(buff[2]);
+        }
+
+        public static implicit operator FlowControlFrame(Communications.Can.CanFrame cFrame)
+        {
+            return IsoTpFrame.ParsePacket<FlowControlFrame>(cFrame.Data);
+        }
+
+        /// <summary>
+        /// Создаёт фрейм отмены потока (с FlowControlFlag = Abort)
+        /// </summary>
+        public static FlowControlFrame AbortFrame
+        {
+            get { return new FlowControlFrame(FlowControlFlag.Abort, 0, 0); }
         }
     }
 }

@@ -14,6 +14,10 @@ namespace Communications.Protocols.IsoTP.Frames
     public class FirstFrame : IsoTpFrame
     {
         /// <summary>
+        /// Вместимость пакета
+        /// </summary>
+        public const int DataCapacity = 6;
+        /// <summary>
         /// Размер полного пакета
         /// </summary>
         public int PacketSize { get; private set; }
@@ -29,7 +33,7 @@ namespace Communications.Protocols.IsoTP.Frames
 
         public FirstFrame(Byte[] Data, int PacketSize)
         {
-            if (Data.Length != 6) throw new ArgumentOutOfRangeException("Data", "Первый фрейм должен содержать ровно 6 байт данных");
+            if (Data.Length != DataCapacity) throw new ArgumentOutOfRangeException("Data", string.Format("Первый фрейм должен содержать ровно {0} байт данных", DataCapacity));
 
             this.Data = Data;
             this.PacketSize = PacketSize;
@@ -43,8 +47,8 @@ namespace Communications.Protocols.IsoTP.Frames
             Byte[] buff = new Byte[8];
 
             buff[0] = (byte)(((byte)FrameType & 0x0f) | (PacketSize & 0x00f) << 4);
-            buff[1] = (byte)(PacketSize & 0xff0 >> 4);
-            Buffer.BlockCopy(Data, 0, buff, 2, 6);
+            buff[1] = (byte)((PacketSize & 0xff0) >> 4);
+            Buffer.BlockCopy(Data, 0, buff, 2, DataCapacity);
 
             return Can.CanFrame.NewWithDescriptor(WithDescriptor, buff);
         }
@@ -53,8 +57,13 @@ namespace Communications.Protocols.IsoTP.Frames
         {
             PacketSize = ((buff[0] & 0xf0) >> 4) | (buff[1] << 4);
 
-            Data = new Byte[8];
-            Buffer.BlockCopy(buff, 2, Data, 0, 6);
+            Data = new Byte[DataCapacity];
+            Buffer.BlockCopy(buff, 2, Data, 0, DataCapacity);
+        }
+
+        public static implicit operator FirstFrame(Communications.Can.CanFrame cFrame)
+        {
+            return IsoTpFrame.ParsePacket<FirstFrame>(cFrame.Data);
         }
     }
 }
