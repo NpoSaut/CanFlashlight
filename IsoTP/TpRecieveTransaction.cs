@@ -59,14 +59,11 @@ namespace Communications.Protocols.IsoTP
 
                     ExpectingConsIndex = 1;
 
-                    // Сообщаем о готовности
-                    SendFlowControl();
-
                     // Начинаем приём данных
                     while (Pointer < Buff.Length)
                     {
+                        SendFlowControl();          // Сообщаем о готовности
                         ReadBlock(FramesStream);    // Читаем следующий блок
-                        SendFlowControl();          // Отправляем контрольный пакет
                     }
                 }
                 catch

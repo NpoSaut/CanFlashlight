@@ -33,33 +33,28 @@ namespace Communications.Protocols.IsoTP
 
                 try
                 {
-                    var fcf = ProcessFlowControl(FramesStream);
+                    // Берём очередь для отправки
+                    var PushingCanFrames = GetConsFrames().Select(cf => cf.GetCanFrame(Descriptor));
 
-                    if (fcf == FlowControlFlag.ClearToSend)
+                    // Повторяем, пока не отослали всю очередь
+                    while (Pointer < Buff.Length)
                     {
-                        // Берём очередь для отправки
-                        var PushingCanFrames = GetConsFrames().Select(cf => cf.GetCanFrame(Descriptor));
+                        // Дожидаемся FlowControl фрейма
+                        ProcessFlowControl(FramesStream);
 
-                        // Повторяем, пока не отослали всю очередь
-                        while (Pointer < Buff.Length)
-                        {
-                            // Берём блок
-                            var Block = PushingCanFrames.Take(BlockSize).ToList();
+                        // Берём блок
+                        var Block = PushingCanFrames.Take(BlockSize).ToList();
                             
-                            // Отправляем его либо сразу, либо с SeparationTime
-                            if (SeparationTime == TimeSpan.Zero)
-                                Port.Send(Block);
-                            else
+                        // Отправляем его либо сразу, либо с SeparationTime
+                        if (SeparationTime == TimeSpan.Zero)
+                            Port.Send(Block);
+                        else
+                        {
+                            foreach (var f in Block)
                             {
-                                foreach (var f in Block)
-                                {
-                                    Port.Send(f);
-                                    System.Threading.Thread.Sleep(SeparationTime);
-                                }
+                                Port.Send(f);
+                                System.Threading.Thread.Sleep(SeparationTime);
                             }
-
-                            // Дожидаемся FlowControl фрейма
-                            ProcessFlowControl(FramesStream);
                         }
                     }
                 }
