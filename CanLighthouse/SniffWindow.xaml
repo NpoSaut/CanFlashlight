@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="SniffWindow" Height="325" Width="610"
         Name="sw"
-        UseLayoutRounding="True" SnapsToDevicePixels="True" Background="{StaticResource {x:Static SystemColors.ControlBrushKey}}" TextOptions.TextFormattingMode="Display">
+        UseLayoutRounding="True" SnapsToDevicePixels="True" Background="{StaticResource {x:Static SystemColors.ControlBrushKey}}" TextOptions.TextFormattingMode="Display" Loaded="sw_Loaded">
     <Window.Resources>
         <SolidColorBrush x:Key="LinesHorizontal">#0C000060</SolidColorBrush>
         <SolidColorBrush x:Key="LinesVertical">#1C000060</SolidColorBrush>

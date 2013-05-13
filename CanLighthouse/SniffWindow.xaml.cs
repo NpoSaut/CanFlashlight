@@ -181,5 +181,10 @@ namespace CanLighthouse
             var frame = e.Row.DataContext as FrameModel;
             e.Row.SetResourceReference(Control.ForegroundProperty, ProtocolDescription.GetBrushResourceNameForDescriptor(frame.Descriptor));
         }
+
+        private void sw_Loaded(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }

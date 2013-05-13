@@ -29,6 +29,8 @@ namespace Communications.Appi
         protected abstract Byte[] ReadBuffer();
         protected abstract void WriteBuffer(Byte[] Buffer);
 
+        private object DevLocker = new object();
+
         public Dictionary<AppiLine, AppiCanPort> Ports { get; private set; }
 
         public AppiDev()
@@ -50,7 +52,11 @@ namespace Communications.Appi
         /// <returns>Сообщения, полученные с момента предыдущего считывания</returns>
         public AppiMessages ReadMessages()
         {
-            var buff = ReadBuffer();
+            Byte[] buff;
+            lock (DevLocker)
+            {
+                buff = ReadBuffer();
+            }
 
             if (buff.Length != BufferSize) return AppiMessages.Empty;
 
@@ -82,6 +88,7 @@ namespace Communications.Appi
             }
         }
 
+        public const int FramesPerSendGroup = 20;
         private byte SendMessageCounter = 0;
         /// <summary>
         /// Отправляет список сообщений в указанный канал
@@ -90,18 +97,30 @@ namespace Communications.Appi
         /// <param name="Line">Канал связи</param>
         internal void SendFrames(IList<CanFrame> Frames, AppiLine Line)
         {
-            Byte[] Buff = new Byte[2048];
-            Buffer.SetByte(Buff, 0, 0x02);
-            Buffer.SetByte(Buff, 1, (byte)Line);
-            Buffer.SetByte(Buff, 3, SendMessageCounter);
-            Buffer.SetByte(Buff, 3, (byte)Frames.Count);
+            var FrameGroups = Frames
+                    .Select((f, i) => new { f, i })
+                    .GroupBy(fi => fi.i / FramesPerSendGroup, fi => fi.f)
+                    .Select(fg => fg.ToList())
+                    .ToList();
 
-            var MessagesBuffer = Frames.SelectMany(m => m.ToBufferBytes()).ToArray();
-            Buffer.BlockCopy(MessagesBuffer, 0, Buff, 10, MessagesBuffer.Length);
+            foreach (var fg in FrameGroups)
+            {
+                lock (DevLocker)
+                {
+                    Byte[] Buff = new Byte[2048];
+                    Buffer.SetByte(Buff, 0, 0x02);
+                    Buffer.SetByte(Buff, 1, (byte)Line);
+                    Buffer.SetByte(Buff, 3, SendMessageCounter);
+                    Buffer.SetByte(Buff, 3, (byte)fg.Count);
 
-            WriteBuffer(Buff);
+                    var MessagesBuffer = fg.SelectMany(m => m.ToBufferBytes()).ToArray();
+                    Buffer.BlockCopy(MessagesBuffer, 0, Buff, 10, MessagesBuffer.Length);
 
-            unchecked { SendMessageCounter++; }
+                    WriteBuffer(Buff);
+
+                    unchecked { SendMessageCounter++; }
+                }
+            }
         }
         /// <summary>
         /// Отправляет одно сообщение в канал

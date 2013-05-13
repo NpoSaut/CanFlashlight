@@ -15,11 +15,12 @@ namespace UsbCanFlasher
         static void Main(string[] args)
         {
             var ds = Communications.Appi.Winusb.WinusbAppiDev.GetDevices().First();
+
             using (var d = ds.OpenDevice(true))
             {
                 d.Ports[AppiLine.Can1].Recieved += new CanFramesReceiveEventHandler(Program_Recieved);
 
-                TpRecieveTransaction rt = new TpRecieveTransaction(d.Ports[AppiLine.Can1], 0x3008) { SeparationTime = TimeSpan.FromMilliseconds(50) };
+                TpRecieveTransaction rt = new TpRecieveTransaction(d.Ports[AppiLine.Can1], 0x3008) { SeparationTime = TimeSpan.FromMilliseconds(100) };
 
                 var tt = System.Threading.Tasks.Task<byte[]>.Factory.StartNew(rt.Recieve);
 
@@ -46,7 +47,12 @@ namespace UsbCanFlasher
         static void Program_Recieved(object sender, CanFramesReceiveEventArgs e)
         {
             foreach (var f in e.Frames.Where(f => f.Descriptor == 0x3008))
+            {
+                ConsoleColor ccol = f.IsLoopback ? ConsoleColor.Cyan : ConsoleColor.Yellow;
+                Console.ForegroundColor = ccol;
                 Console.WriteLine("{1} {0}", f, f.IsLoopback ? "*" : " ");
+                Console.ResetColor();
+            }
         }
     }
 }
