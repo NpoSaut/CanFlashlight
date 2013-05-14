@@ -15,32 +15,32 @@ namespace Communications.Protocols.IsoTP
         public int BlockSize { get; private set; }
         public TimeSpan SeparationTime { get; set; }
 
-        public TpSendTransaction(CanPort Port, int Descriptor)
-            : base(Port, Descriptor)
+        public TpSendTransaction(CanPort Port, int TransmitDescriptor, int AcknowlegmentDescriptor)
+            : base(Port, TransmitDescriptor, AcknowlegmentDescriptor)
         {}
 
         public void Send(TpPacket Packet)
         {
             if (this.Status != TpTransactionStatus.Ready) throw new IsoTpTransactionReuseException(this);
             this.Status = TpTransactionStatus.Active;
-
             this.Buff = Packet.Data;
-            Port.Send(GetFirstFrame().GetCanFrame(Descriptor));
 
-            using (var FramesReader = new CanFramesBuffer(Descriptor, Port))
+            using (var FramesReader = new CanFramesBuffer(AcknowlegmentDescriptor, Port))
             {
-                var FramesStream = FramesReader.Read(Timeout, true);
+                var AckStream = FramesReader.Read(Timeout, true);
 
                 try
                 {
+                    Port.Send(GetFirstFrame().GetCanFrame(TransmitDescriptor));
+
                     // Берём очередь для отправки
-                    var PushingCanFrames = GetConsFrames().Select(cf => cf.GetCanFrame(Descriptor));
+                    var PushingCanFrames = GetConsFrames().Select(cf => cf.GetCanFrame(TransmitDescriptor));
 
                     // Повторяем, пока не отослали всю очередь
                     while (Pointer < Buff.Length)
                     {
                         // Дожидаемся FlowControl фрейма
-                        ProcessFlowControl(FramesStream);
+                        ProcessFlowControl(AckStream);
 
                         // Берём блок
                         var Block = PushingCanFrames.Take(BlockSize).ToList();

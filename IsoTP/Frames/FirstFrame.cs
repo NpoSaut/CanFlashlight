@@ -46,8 +46,9 @@ namespace Communications.Protocols.IsoTP.Frames
         {
             Byte[] buff = new Byte[8];
 
-            buff[0] = (byte)(((byte)FrameType & 0x0f) | (PacketSize & 0x00f) << 4);
-            buff[1] = (byte)((PacketSize & 0xff0) >> 4);
+            buff[0] = (byte)(((byte)FrameType & 0x0f) << 4 | (PacketSize & 0xf00) >> 8);
+            buff[1] = (byte)(PacketSize & 0x0ff);
+            
             Buffer.BlockCopy(Data, 0, buff, 2, DataCapacity);
 
             return Can.CanFrame.NewWithDescriptor(WithDescriptor, buff);
@@ -55,7 +56,7 @@ namespace Communications.Protocols.IsoTP.Frames
 
         protected override void FillWithBytes(byte[] buff)
         {
-            PacketSize = ((buff[0] & 0xf0) >> 4) | (buff[1] << 4);
+            PacketSize = buff[1] | (buff[0] & 0x0f) << 8;
 
             Data = new Byte[DataCapacity];
             Buffer.BlockCopy(buff, 2, Data, 0, DataCapacity);

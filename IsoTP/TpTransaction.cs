@@ -19,7 +19,11 @@ namespace Communications.Protocols.IsoTP
         /// <summary>
         /// Используемый дескриптор
         /// </summary>
-        public int Descriptor { get; private set; }
+        public int TransmitDescriptor { get; private set; }
+        /// <summary>
+        /// Используемый дескриптор
+        /// </summary>
+        public int AcknowlegmentDescriptor { get; private set; }
         /// <summary>
         /// Время ожидания пакета
         /// </summary>
@@ -43,9 +47,10 @@ namespace Communications.Protocols.IsoTP
             }
         }
 
-        public TpTransaction(CanPort Port, int Descriptor)
+        public TpTransaction(CanPort Port, int TransmitDescriptor, int AcknowlegmentDescriptor)
         {
-            this.Descriptor = Descriptor;
+            this.TransmitDescriptor = TransmitDescriptor;
+            this.AcknowlegmentDescriptor = AcknowlegmentDescriptor;
             this.Port = Port;
             this.Timeout = TimeSpan.FromSeconds(3);
             this.Status = TpTransactionStatus.Ready;

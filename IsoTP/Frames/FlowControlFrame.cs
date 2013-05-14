@@ -73,7 +73,8 @@ namespace Communications.Protocols.IsoTP.Frames
         {
             return Code < 0x7f ?
                     TimeSpan.FromMilliseconds(Code) :
-                    TimeSpan.FromMilliseconds((Code - 0xf0) * 0.1);
+                //TimeSpan.FromMilliseconds((Code - 0xf0) * 0.1);
+                    TimeSpan.FromMilliseconds(1);
         }
         private Byte SeparationCodeFromTime(TimeSpan Time)
         {
@@ -87,7 +88,7 @@ namespace Communications.Protocols.IsoTP.Frames
         {
             var buff = new Byte[8];
 
-            buff[0] = (byte)(((byte)FrameType & 0x0f) | ((byte)Flag & 0x0f) << 4);
+            buff[0] = (byte)(((byte)FrameType & 0x0f) << 4 | (byte)Flag & 0x0f);
             buff[1] = BlockSize;
             buff[2] = SeparationCodeFromTime(SeparationTime);
             
@@ -96,7 +97,7 @@ namespace Communications.Protocols.IsoTP.Frames
 
         protected override void FillWithBytes(byte[] buff)
         {
-            this.Flag = (FlowControlFlag)(buff[0] >> 4);
+            this.Flag = (FlowControlFlag)(buff[0] & 0x0f);
             this.BlockSize = buff[1];
             this.SeparationTime = SeparationTimeFromCode(buff[2]);
         }

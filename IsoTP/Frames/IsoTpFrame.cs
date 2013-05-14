@@ -45,7 +45,7 @@ namespace Communications.Protocols.IsoTP.Frames
         /// </summary>
         public static IsoTpFrameType GetFrameType(Byte[] buff)
         {
-            var TypeCode = buff[0] & 0x0f;
+            var TypeCode = (buff[0] & 0xf0) >> 4;
             if (TypeCode > 0x3) return IsoTpFrameType.Invalid;
             else return (IsoTpFrameType)(TypeCode);
         }

@@ -25,8 +25,8 @@ namespace Communications.Protocols.IsoTP
         public TimeSpan SeparationTime { get; set; }
         public Byte BlockSize { get; set; }
 
-        public TpRecieveTransaction(CanPort Port, int Descriptor)
-            : base(Port, Descriptor)
+        public TpRecieveTransaction(CanPort Port, int TransmitDescriptor, int AcknowlegmentDescriptor)
+            : base(Port, TransmitDescriptor, AcknowlegmentDescriptor)
         {
             this.SeparationTime = TimeSpan.Zero;
             this.BlockSize = 20;
@@ -37,7 +37,7 @@ namespace Communications.Protocols.IsoTP
             if (this.Status != TpTransactionStatus.Ready) throw new IsoTpTransactionReuseException(this);
             this.Status = TpTransactionStatus.Active;
 
-            using (var FramesReader = new CanFramesBuffer(Descriptor, Port))
+            using (var FramesReader = new CanFramesBuffer(TransmitDescriptor, Port))
             {
                 // Инициализируем чтение с заданным таймаутом,
                 // при истечении таймаута - выбрасываем ошибку.
@@ -70,7 +70,7 @@ namespace Communications.Protocols.IsoTP
                 {
                     // При любой ошибке отправляем пакет отмены передачи
                     this.Status = TpTransactionStatus.Error;
-                    Port.Send(FlowControlFrame.AbortFrame.GetCanFrame(Descriptor));
+                    Port.Send(FlowControlFrame.AbortFrame.GetCanFrame(AcknowlegmentDescriptor));
                     throw;      // и пробрасываем ошибку дальше по стеку
                 }
             }
@@ -101,7 +101,7 @@ namespace Communications.Protocols.IsoTP
         }
         private void SendFlowControl()
         {
-            Port.Send(GenerateFlowControl().GetCanFrame(Descriptor));
+            Port.Send(GenerateFlowControl().GetCanFrame(AcknowlegmentDescriptor));
         }
         private FlowControlFrame GenerateFlowControl()
         {
