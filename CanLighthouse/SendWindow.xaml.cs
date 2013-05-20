@@ -13,6 +13,7 @@ using System.Windows.Shapes;
 using Communications.Can;
 using CanLighthouse.Models;
 using System.Text.RegularExpressions;
+using System.Timers;
 
 namespace CanLighthouse
 {
@@ -39,6 +40,11 @@ namespace CanLighthouse
             InitializeComponent();
 
             this.Title = string.Format("Отправка в {0}", Port.Name);
+            
+            t = new Timer();
+            t.Elapsed += new ElapsedEventHandler(t_Elapsed);
+
+            Dispatcher.BeginInvoke((Action<String>)(txt => SendEdit.Text = txt), Properties.Settings.Default.LastSend);
         }
 
         private FrameModel ParseFrameString(String str)
@@ -168,6 +174,24 @@ namespace CanLighthouse
             ops.Aggregate(t0,
                 (seed, op) => seed.ContinueWith(t => DoSendOperation(op)));
             t0.Start();
+        }
+
+        Timer t;
+        private void ToggleButton_CheckedUnchecked(object sender, RoutedEventArgs e)
+        {
+            t.Interval = Int32.Parse(TimerIntervalTextBox.Text);
+            t.Enabled = (sender as System.Windows.Controls.Primitives.ToggleButton).IsChecked == true;
+        }
+
+        void t_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            Dispatcher.BeginInvoke((Action<object, IInputElement>)Commands.SendAll.Execute, null, this);
+        }
+
+        private void SendEdit_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            Properties.Settings.Default.LastSend = (sender as TextBox).Text;
+            Properties.Settings.Default.Save();
         }
     }
 

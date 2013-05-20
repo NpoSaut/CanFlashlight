@@ -62,6 +62,9 @@ namespace CanLighthouse
             ListeningPorts = new ObservableCollection<CanPort>();
             ListeningPorts.CollectionChanged += new NotifyCollectionChangedEventHandler(ListeningPorts_CollectionChanged);
             foreach (var lp in OnPorts) ListeningPorts.Add(lp);
+
+
+            Dispatcher.BeginInvoke((Action<String>)(txt => FiltersEdit.Text = txt), Properties.Settings.Default.LastFilters);
         }
 
         void ListeningPorts_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
@@ -98,8 +101,7 @@ namespace CanLighthouse
             if (!FramesSyncronizationScheduled)
             {
                 FramesSyncronizationScheduled = true;
-                Dispatcher.BeginInvoke((Action)SyncronizeFramesOutput,
-                    System.Windows.Threading.DispatcherPriority.Background);
+                Dispatcher.BeginInvoke((Action)SyncronizeFramesOutput);
             }
         }
         private bool FramesSyncronizationScheduled = false;
@@ -109,14 +111,26 @@ namespace CanLighthouse
             for (int i = 0; i < Frames.Count + FramesToInterfaceBuffer.Count - CutOffCount; i++)
                 Frames.RemoveAt(0);
 
-            this.Title = string.Join("", Enumerable.Repeat('.', FramesToInterfaceBuffer.Count));
             FrameModel f;
+            bool beep = false;
+            bool checkbeep = BeepMenuItem.IsChecked;
             while (FramesToInterfaceBuffer.TryDequeue(out f))
             {
                 Frames.Add(f);
+                if (checkbeep && FrameFilter(f))
+                    beep = true;
             }
             FramesSyncronizationScheduled = false;
-            LogGrid.ScrollIntoView(Frames.Last());
+
+            if (beep)
+                //Dispatcher.BeginInvoke((Action<int, int>)Console.Beep, 1000, 50);
+                //Console.Beep(1000, 50);
+                System.Threading.Tasks.Task.Factory.StartNew(() => Console.Beep(1000, 50));
+
+            if (AutostrollMenuItem.IsChecked)
+                Dispatcher.BeginInvoke((Action<object>)LogGrid.ScrollIntoView,
+                    System.Windows.Threading.DispatcherPriority.Loaded,
+                    FramesCV.OfType<FrameModel>().Last());
         }
 
         private void FiltersEdit_TextChanged(object sender, TextChangedEventArgs e)
@@ -139,6 +153,9 @@ namespace CanLighthouse
                 if (Filters.Any()) FramesCV.Filter = FrameFilter;
                 else FramesCV.Filter = null;
             }
+
+            Properties.Settings.Default.LastFilters = (sender as TextBox).Text;
+            Properties.Settings.Default.Save();
         }
 
         private ushort GetDescriptor(String str)

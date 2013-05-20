@@ -19,7 +19,7 @@
         </Grid.RowDefinitions>
         <TextBlock Grid.Row="0" Text="Формат: XXXX XX XX XX XX XX XX XX XX" />
         <TextBox Grid.Row="1" Margin="2"
-            Name="SendEdit" AcceptsReturn="True" AcceptsTab="True" SelectionChanged="SendEdit_SelectionChanged" />
+            Name="SendEdit" AcceptsReturn="True" AcceptsTab="True" SelectionChanged="SendEdit_SelectionChanged" TextChanged="SendEdit_TextChanged" />
         <GroupBox Name="FrameEditer" Grid.Row="2" Header="Выбрано" DataContext="{Binding SelectedFrame}">
             <GroupBox.Style>
                 <Style TargetType="GroupBox">
@@ -77,11 +77,11 @@
             </GroupBox>
             <GroupBox Grid.Column="1" Header="Повтор">
                 <StackPanel Grid.Column="1" Orientation="Horizontal" >
-                    <ToggleButton Grid.Column="0" Margin="2" Content="Повторять" />
+                    <ToggleButton Grid.Column="0" Margin="2" Content="Повторять" Checked="ToggleButton_CheckedUnchecked" Unchecked="ToggleButton_CheckedUnchecked" />
                     <StackPanel>
                         <TextBlock Text="Интервал:" />
                         <StackPanel Orientation="Horizontal">
-                            <TextBox Width="70" />
+                            <TextBox Width="70" Name="TimerIntervalTextBox" Text="500" />
                             <TextBlock VerticalAlignment="Bottom" Text="мс"  />
                         </StackPanel>
                     </StackPanel>

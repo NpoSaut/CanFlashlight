@@ -89,8 +89,16 @@ namespace CanLighthouse.Models
         /// </summary>
         public String BinaryString
         {
-            get { return string.Join("-", Data.Select(B => String.Join("", Enumerable.Range(0, 8).Select(i => (B >> i) & 0x01).Reverse())).Reverse()); }
-            set { Data = DecodeDataString(value, 2, true); }
+            get
+            {
+                return string.Join(" ",
+                    Data.Select(B =>
+                        String.Join("",
+                            Enumerable.Range(0, 8)
+                                .Select(i => (B >> i) & 0x01)
+                                .Reverse()).Insert(4, " ")));
+            }
+            set { Data = DecodeDataString(value, 2); }
         }
         /// <summary>
         /// Представление в виде десятичной строки
@@ -103,10 +111,14 @@ namespace CanLighthouse.Models
         
         private Byte[] DecodeDataString(String str, int Base, bool reorder = false)
         {
-            str = str.ToLower();
+            str = str.ToLower().Replace(" ", "");
+
             string basepattern = "0-" + Math.Min(9, Base-1);
             if (Base > 10) basepattern += "a-" + (Char)((int)'a' + Base - 11);
-            string Pattern = @"((?<databyte>[" + basepattern + @"]{1," + Math.Ceiling(Math.Log(256, Base)).ToString() + @"})[\s-]?){1,8}";
+
+            string itemsperbyte = Math.Ceiling(Math.Log(256, Base)).ToString();
+
+            string Pattern = @"((?<databyte>[" + basepattern + @"]{1," + itemsperbyte + @"})[\s-]*){1,8}";
 
             Regex regex = new Regex(Pattern);
             Match match = regex.Match(str);
