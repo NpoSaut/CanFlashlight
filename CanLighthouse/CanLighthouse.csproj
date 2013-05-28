@@ -61,6 +61,7 @@
     <Compile Include="Models\FrameHandlerModel.cs" />
     <Compile Include="Models\FrameModel.cs" />
     <Compile Include="Models\SendingModel.cs" />
+    <Compile Include="Models\SniffStatisticsModel.cs" />
     <Compile Include="SendOperation.cs" />
     <Compile Include="SendWindow.xaml.cs">
       <DependentUpon>SendWindow.xaml</DependentUpon>
