@@ -10,7 +10,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CanLine", "CanLine\CanLine.csproj", "{5BD64D61-F283-4833-B5A0-25EBE435AC89}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CanLighthouse", "CanLighthouse\CanLighthouse.csproj", "{CBE7022D-922F-4BE4-B0DA-C9E595CA494F}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IsoTP", "IsoTP\IsoTP.csproj", "{A45417B6-4547-4E98-B69E-4CB1CFE45F61}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IntermoduleResolving", "IntermoduleResolving\IntermoduleResolving.csproj", "{1BA82E91-7543-45D5-B4D3-C7DBEA47ABEF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -82,6 +85,16 @@ Global
 		{A45417B6-4547-4E98-B69E-4CB1CFE45F61}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{A45417B6-4547-4E98-B69E-4CB1CFE45F61}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{A45417B6-4547-4E98-B69E-4CB1CFE45F61}.Release|x86.ActiveCfg = Release|Any CPU
+		{1BA82E91-7543-45D5-B4D3-C7DBEA47ABEF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1BA82E91-7543-45D5-B4D3-C7DBEA47ABEF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1BA82E91-7543-45D5-B4D3-C7DBEA47ABEF}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{1BA82E91-7543-45D5-B4D3-C7DBEA47ABEF}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{1BA82E91-7543-45D5-B4D3-C7DBEA47ABEF}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{1BA82E91-7543-45D5-B4D3-C7DBEA47ABEF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1BA82E91-7543-45D5-B4D3-C7DBEA47ABEF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1BA82E91-7543-45D5-B4D3-C7DBEA47ABEF}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{1BA82E91-7543-45D5-B4D3-C7DBEA47ABEF}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{1BA82E91-7543-45D5-B4D3-C7DBEA47ABEF}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
