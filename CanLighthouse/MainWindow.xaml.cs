@@ -37,12 +37,13 @@ namespace CanLighthouse
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            //(new SendWindow(Ports.First()) { Owner = this }).Show();
+            (new SendWindow(Ports.First()) { Owner = this }).Show();
 
-            //(new SniffWindow(Ports) { Owner = this } ).Show();
-            var ppp = new Communications.Can.LogReader.LogReaderPort(new FileInfo("can.txt"));
-            (new SniffWindow(new List<CanPort>() { ppp }) { Owner = this }).Show();
-            ppp.Start();
+            (new SniffWindow(Ports) { Owner = this } ).Show();
+            
+            //var ppp = new Communications.Can.LogReader.LogReaderPort(new FileInfo("can.txt"));
+            //(new SniffWindow(new List<CanPort>() { ppp }) { Owner = this }).Show();
+            //ppp.Start();
 
             //(new WatchWindow(Ports.First()) { Owner = this }).Show();
         }

@@ -127,7 +127,7 @@ namespace CanLighthouse
                 //Console.Beep(1000, 50);
                 System.Threading.Tasks.Task.Factory.StartNew(() => Console.Beep(1000, 50));
 
-            if (AutostrollMenuItem.IsChecked)
+            if (AutostrollMenuItem.IsChecked && !LogGrid.Items.IsEmpty)
                 Dispatcher.BeginInvoke((Action<object>)LogGrid.ScrollIntoView,
                     System.Windows.Threading.DispatcherPriority.Loaded,
                     FramesCV.OfType<FrameModel>().Last());
