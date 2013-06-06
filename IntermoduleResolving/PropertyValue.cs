@@ -5,8 +5,11 @@ using System.Text;
 
 namespace IntermoduleResolving
 {
-    public class FrameDescription
+    public class PropertyValue
     {
-        public String FrameName { get; set; }
+        public PropertyKind Kind { get; private set; }
+
+        internal PropertyValue()
+        { }
     }
 }
