@@ -10,11 +10,13 @@ namespace Communications.Can.LogRecording
     {
         public FileInfo LogFile { get; set; }
         public CanPort Port { get; set; }
+        public Stream FileStream { get; set; }
 
         public LogRecorder(CanPort Port, FileInfo LogFile)
         {
             this.Port = Port;
             this.LogFile = LogFile;
+            FileStream = LogFile.Open(FileMode.Append, FileAccess.Write);
 
             Port.Recieved += Port_Recieved;
         }
@@ -22,13 +24,15 @@ namespace Communications.Can.LogRecording
         private void Port_Recieved(object sender, CanFramesReceiveEventArgs e)
         {
             WriteFrames(e.Frames);
+            FileStream.Flush();
         }
 
         public abstract void WriteFrames(IEnumerable<CanFrame> Frames);
 
-        public void Dispose()
+        public virtual void Dispose()
         {
             Port.Recieved -= Port_Recieved;
+            FileStream.Close();
         }
     }
 }

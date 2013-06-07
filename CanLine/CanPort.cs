@@ -73,6 +73,8 @@ namespace Communications.Can
         {
             if (Frames.Any())
             {
+                foreach (var f in Frames) f.Time = DateTime.Now;
+
                 if (Recieved != null) Recieved(this, new CanFramesReceiveEventArgs(Frames, this));
 
                 lock (_Handlers)

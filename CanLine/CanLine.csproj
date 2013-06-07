@@ -44,9 +44,14 @@
     <Compile Include="CanFrameHandler.cs" />
     <Compile Include="CanFramesBuffer.cs" />
     <Compile Include="CanPort.cs" />
+    <Compile Include="FrameEncoders\FrameTextEncoder.cs" />
     <Compile Include="FrameEncoders\FrameEncoder.cs" />
-    <Compile Include="LogReader\LogReaderPort.cs" />
+    <Compile Include="FrameEncoders\FrameSbsEncoder.cs" />
+    <Compile Include="FrameEncoders\FrameStreamEncoder.cs" />
+    <Compile Include="LogReader\CanVirtualPort.cs" />
+    <Compile Include="LogReader\StreamEncoderPort.cs" />
     <Compile Include="LogReader\TextLogReaderPort.cs" />
+    <Compile Include="LogRecording\LogEncodingRecorder.cs" />
     <Compile Include="LogRecording\LogRecorder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

@@ -7,13 +7,13 @@ using System.IO;
 
 namespace Communications.Can.LogReader
 {
-    public class TextLogReaderPort : LogReaderPort
+    public class TextLogReaderPort : CanVirtualPort
     {
         private TextReader tr { get; set; }
         public String Pattern { get; set; }
 
         public TextLogReaderPort(FileInfo LogFile)
-            : base(LogFile)
+            : base(LogFile.Name)
         {
             Pattern = @"(?<descriptor>[0-9a-fA-F]{4})[\s]((?<databyte>[0-9a-fA-F]{2})\s?){1,8}";
             tr = new StreamReader(LogFile.FullName);

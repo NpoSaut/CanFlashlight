@@ -88,8 +88,12 @@ namespace CanLighthouse
 
         private bool FrameFilter(object fo)
         {
-            var fr = fo as FrameModel;
-            return Filters.Contains(fr.Descriptor);
+            if (!Filters.Any()) return true;
+            else
+            {
+                var fr = fo as FrameModel;
+                return Filters.Contains(fr.Descriptor);
+            }
         }
 
         void CanFrames_Recieved(object sender, Communications.Can.CanFramesReceiveEventArgs e)
@@ -117,17 +121,15 @@ namespace CanLighthouse
             while (FramesToInterfaceBuffer.TryDequeue(out f))
             {
                 Frames.Add(f);
-                if (checkbeep && FrameFilter(f))
+                if (checkbeep && !beep && FrameFilter(f))
                     beep = true;
             }
             FramesSyncronizationScheduled = false;
 
             if (beep)
-                //Dispatcher.BeginInvoke((Action<int, int>)Console.Beep, 1000, 50);
-                //Console.Beep(1000, 50);
                 System.Threading.Tasks.Task.Factory.StartNew(() => Console.Beep(1000, 50));
 
-            if (AutostrollMenuItem.IsChecked)
+            if (AutostrollMenuItem.IsChecked && ! LogGrid.Items.IsEmpty)
                 Dispatcher.BeginInvoke((Action<object>)LogGrid.ScrollIntoView,
                     System.Windows.Threading.DispatcherPriority.Loaded,
                     FramesCV.OfType<FrameModel>().Last());

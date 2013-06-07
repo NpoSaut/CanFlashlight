@@ -17,6 +17,8 @@ using Communications.Can;
 using Communications.Appi.Winusb;
 using Communications.Appi;
 using System.Collections.ObjectModel;
+using Communications.Can.LogRecording;
+using Communications.Can.FrameEncoders;
 
 namespace CanLighthouse
 {
@@ -37,14 +39,22 @@ namespace CanLighthouse
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            //(new SendWindow(Ports.First()) { Owner = this }).Show();
+            Directory.CreateDirectory("CanLog");
 
-            //(new SniffWindow(Ports) { Owner = this } ).Show();
-            var ppp = new Communications.Can.LogReader.LogReaderPort(new FileInfo("can.txt"));
-            (new SniffWindow(new List<CanPort>() { ppp }) { Owner = this }).Show();
-            ppp.Start();
+            //var ppp = new StreamEncoderPort<FrameSbsEncoder>(new FileInfo("data"));
+            //Ports.Add(ppp);
 
-            //(new WatchWindow(Ports.First()) { Owner = this }).Show();
+            (new SendWindow(Ports.First()) { Owner = this }).Show();
+            (new SniffWindow(Ports) { Owner = this } ).Show();
+
+
+            foreach (var p in Ports)
+            {
+                new LogEncodingRecorder<FrameSbsEncoder>(p, new FileInfo(System.IO.Path.Combine("CanLog", string.Format("log {0}.bin", p.Name))));
+                new LogEncodingRecorder<FrameTextEncoder>(p, new FileInfo(System.IO.Path.Combine("CanLog", string.Format("log {0}.txt", p.Name))));
+            }
+
+            //ppp.Start();
         }
     }
 }

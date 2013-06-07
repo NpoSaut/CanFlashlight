@@ -8,15 +8,13 @@ using System.Text.RegularExpressions;
 
 namespace Communications.Can.LogReader
 {
-    public abstract class LogReaderPort : CanPort, IDisposable
+    public abstract class CanVirtualPort : CanPort, IDisposable
     {
-        public FileInfo LogFile { get; private set; }
         private Timer ReadTimer { get; set; }
 
-        public LogReaderPort(FileInfo LogFile)
-            : base(LogFile.Name)
+        public CanVirtualPort(String Name)
+            : base(Name)
         {
-            this.LogFile = LogFile;
             ReadTimer = new Timer(1000);
             ReadTimer.Elapsed += new ElapsedEventHandler(ReadTimer_Elapsed);
         }

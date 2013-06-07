@@ -34,6 +34,11 @@ namespace Communications.Can
         public bool IsLoopback { get; private set; }
 
         /// <summary>
+        /// Время получения или время создания фейма
+        /// </summary>
+        public DateTime Time { get; set; }
+
+        /// <summary>
         /// Является ли этот фрейм обработанным
         /// </summary>
         /// <remarks>
