@@ -10,17 +10,22 @@ namespace BlokFrames
     public abstract class BlokFrame
     {
         /// <summary>
+        /// Время приёма этого сообщения (для принятых сообщений)
+        /// </summary>
+        public DateTime Time { get; set; }
+
+        /// <summary>
         /// Дескриптор, соответствующий данному сообщению
         /// </summary>
         public int Descriptor
         {
             get { return GetDescriptor(this.GetType()); }
         }
-        protected static int GetDescriptor(Type T)
+        public static int GetDescriptor(Type T)
         {
             return T.GetCustomAttributes(typeof(FrameDescriptorAttribute), false).OfType<FrameDescriptorAttribute>().First().Descriptor;
         }
-        protected static int GetDescriptor<T>() where T: BlokFrame
+        public static int GetDescriptor<T>() where T : BlokFrame
         {
             return GetDescriptor(typeof(T));
         }
@@ -49,6 +54,7 @@ namespace BlokFrames
             if (GetDescriptor<T>() != f.Descriptor)
                 throw new DescriptorMismatchException("Дескриптор расшифровываемого фрейма не соответствует дескриптору  типа");
             var res = new T();
+            res.Time = f.Time;
             res.FillWithCanFrameData(f.Data);
             return res;
         }

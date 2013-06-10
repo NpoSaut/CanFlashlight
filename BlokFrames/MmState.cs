@@ -10,6 +10,10 @@ namespace BlokFrames
     public enum MapTargetKind : byte
     {
         /// <summary>
+        /// Фиктивная цель, которая и целью не является
+        /// </summary>
+        InvalidTarget = 0,
+        /// <summary>
         /// Светофор
         /// </summary>
         TrafficLight = 1,
@@ -61,7 +65,7 @@ namespace BlokFrames
     public class MapTarget
     {
         public MapTargetKind Kind { get; set; }
-        public Int16 X { get; set; }
+        public UInt16 X { get; set; }
         /// <summary>
         /// Наличие АЛС-ЕН
         /// </summary>
@@ -81,14 +85,14 @@ namespace BlokFrames
 
         public override string ToString()
         {
-            return String.Format("{0} [{1:N0} : {1:N)}]", Kind, X, Length);
+            return String.Format("{0} [{1:N0} : {2:N0}]", Kind, X, Length);
         }
     }
 
     [FrameDescriptor(0x43E8)]
     /// <summary>
     /// Сообщение MM_STATE передаётся модулем ЭК с периодом 100 мкс
-    /// Содрежит описание одной из ближайших целей
+    /// Содержит описание одной из ближайших целей
     /// </summary>
     public class MmState : BlokFrame
     {
@@ -101,7 +105,7 @@ namespace BlokFrames
         /// </summary>
         public bool Good { get; set; }
         /// <summary>
-        /// Номер цели (нужен только для попрядка в CAN)
+        /// Номер цели (нужен только для порядка в CAN)
         /// </summary>
         public int TargetNumber { get; set; }
         /// <summary>
@@ -144,7 +148,7 @@ namespace BlokFrames
                 new MapTarget()
                 {
                     Kind = (MapTargetKind)(Data[1] >> 4),
-                    X = BitConverter.ToInt16(new byte[2] { Data[3], Data[2] }, 0),
+                    X = BitConverter.ToUInt16(new byte[2] { Data[3], Data[2] }, 0),
                     AlsEn = ((Data[4] >> 7) & 1) != 0,
                     OnStation = ((Data[4] >> 6) & 1) != 0,
                     Length = BitConverter.ToUInt16(new byte[2] { Data[5], (byte)(Data[4] & 0x1F) }, 0),

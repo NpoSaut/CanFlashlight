@@ -17,6 +17,7 @@ namespace Communications.Can.FrameEncoders
             UInt16 descripter = BitConverter.ToUInt16(HeaderBuffer, 8);
 
             var frame = CanFrame.NewWithDescriptor(descripter);
+            frame.Time = dt;
             DataStream.Read(frame.Data, 0, frame.Data.Length);
             return frame;
         }

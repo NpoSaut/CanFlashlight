@@ -7,7 +7,7 @@ namespace BlokFrames
 {
     public class FrameDescriptorAttribute : Attribute
     {
-        public int Descriptor { get; set; }
+        public int Descriptor { get; private set; }
 
         public FrameDescriptorAttribute(int Descriptor)
         {
