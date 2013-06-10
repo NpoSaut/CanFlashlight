@@ -16,7 +16,7 @@ namespace CanLighthouse.Models
         public SniffStatisticsModel(IList<FrameModel> Frames)
         {
             FramesCount = Frames.Count;
-            Duration = Frames.Select(f => f.RecieveTime).Max() - Frames.Select(f => f.RecieveTime).Min();
+            Duration = Frames.Any() ? Frames.Select(f => f.RecieveTime).Max() - Frames.Select(f => f.RecieveTime).Min() : TimeSpan.Zero;
             var Distincts = Frames.Distinct(new Distinctator()).ToList();
             DistinctedFrames = new ReadOnlyCollection<FrameModel>(Distincts);
         }
