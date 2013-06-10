@@ -44,6 +44,7 @@
     <Compile Include="DescriptorMismatchException.cs" />
     <Compile Include="FrameDescriptorAttribute.cs" />
     <Compile Include="MmAltLongFrame.cs" />
+    <Compile Include="MmState.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
