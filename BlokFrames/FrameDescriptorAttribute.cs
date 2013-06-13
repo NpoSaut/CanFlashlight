@@ -5,13 +5,22 @@ using System.Text;
 
 namespace BlokFrames
 {
+    public enum HalfsetKind { Uniset, SetA, SetB }
+
     public class FrameDescriptorAttribute : Attribute
     {
         public int Descriptor { get; set; }
+        public HalfsetKind Halfset { get; set; }
 
         public FrameDescriptorAttribute(int Descriptor)
         {
             this.Descriptor = Descriptor;
+            this.Halfset = HalfsetKind.Uniset;
+        }
+        public FrameDescriptorAttribute(int Descriptor, HalfsetKind Halfset)
+            : this(Descriptor)
+        {
+            this.Halfset = Halfset;
         }
     }
 }
