@@ -7,6 +7,7 @@ namespace BlokFrames
 {
     public enum HalfsetKind { Uniset, SetA, SetB }
 
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple=true, Inherited=false)]
     public class FrameDescriptorAttribute : Attribute
     {
         public int Descriptor { get; set; }
