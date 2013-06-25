@@ -19,7 +19,7 @@ namespace Communications.Appi
             this.Line = Line;
         }
 
-        public override void Send(IList<CanFrame> Frames)
+        protected override void SendImplementation(IList<CanFrame> Frames)
         {
             Device.SendFrames(Frames, Line);
         }

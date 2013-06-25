@@ -1,0 +1,26 @@
+﻿<Window x:Class="CanLighthouse.WatchWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="WatchWindow" Height="302" Width="427"
+        Name="ww"
+        UseLayoutRounding="True" SnapsToDevicePixels="True" Background="{StaticResource {x:Static SystemColors.ControlBrushKey}}" TextOptions.TextFormattingMode="Display">
+    <Window.Resources>
+        <SolidColorBrush x:Key="LinesHorizontal">#0C000060</SolidColorBrush>
+        <SolidColorBrush x:Key="LinesVertical">#1C000060</SolidColorBrush>
+    </Window.Resources>
+    <Grid>
+        <DataGrid Grid.Row="1" Grid.Column="0" Margin="2"
+                  ItemsSource="{Binding ElementName=ww, Path=HandlerModels}"
+                  AutoGenerateColumns="False" IsReadOnly="True"
+                  HorizontalGridLinesBrush="{StaticResource LinesHorizontal}" VerticalGridLinesBrush="{StaticResource LinesVertical}" Name="LogGrid">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Время" Binding="{Binding RecieveTime, StringFormat='HH:mm:ss.ff'}" />
+                <DataGridTextColumn Header="Порт" Binding="{Binding Port}" />
+                <DataGridTextColumn Header="Дескр" Binding="{Binding Descriptor, StringFormat=X4}" />
+                <DataGridTextColumn Header="Данные" Binding="{Binding LastFrame.HexString}" />
+                <DataGridTextColumn Header="Название" Binding="{Binding LastFrame.FrameName}" />
+                <DataGridTextColumn Header="Название" Binding="{Binding LastDataValid}" />
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</Window>

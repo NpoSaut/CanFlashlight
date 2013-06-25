@@ -1,0 +1,7 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ProtocolDescription Name="Тестовый">
+  <FrameDescription Descriptor="1048" Color="#ff505050" Name="SEC_COUNTER" />
+  <FrameDescription Descriptor="1001" Color="#ffff3000" Name="FLOOD_CONTROL" />
+  <FrameDescription Descriptor="8d07" Color="#ffff5000" Name="SYS_DIAGNOSTICS" />
+  <FrameDescription Descriptor="0803" Color="#ff0050ff" Name="MCO_MODE" />
+</ProtocolDescription>
