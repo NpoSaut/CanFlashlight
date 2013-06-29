@@ -181,12 +181,11 @@ namespace Communications.Appi
         /// </summary>
         public void StopListening()
         {
-            lock (IsListeningSynchronizingObject)
-                if (IsListening)
-                {
-                    IsListening = false;
-                    //ListeningThread.Abort();
-                }
+            if (IsListening)
+            {
+                IsListening = false;
+                //ListeningThread.Abort();
+            }
         }
 
         /// <summary>

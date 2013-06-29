@@ -37,6 +37,8 @@ namespace CanLighthouse
             get { return (App.Current as App).Ports; }
         }
 
+        public SniffWindow SniffingWindow { get; private set; }
+
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             Directory.CreateDirectory("CanLog");
@@ -44,17 +46,44 @@ namespace CanLighthouse
             //var ppp = new StreamEncoderPort<FrameSbsEncoder>(new FileInfo("data"));
             //Ports.Add(ppp);
 
-            (new SendWindow(Ports.First()) { Owner = this }).Show();
-            (new SniffWindow(Ports) { Owner = this } ).Show();
+            if (Ports.Any()) (new SendWindow(Ports.First()) { Owner = this }).Show();
+            (SniffingWindow = (new SniffWindow(Ports) { Owner = this } )).Show();
 
+            Ports.CollectionChanged += new System.Collections.Specialized.NotifyCollectionChangedEventHandler(Ports_CollectionChanged);
 
             foreach (var p in Ports)
             {
-                new LogEncodingRecorder<FrameSbsEncoder>(p, new FileInfo(System.IO.Path.Combine("CanLog", string.Format("log {0}.bin", p.Name))));
-                new LogEncodingRecorder<FrameTextEncoder>(p, new FileInfo(System.IO.Path.Combine("CanLog", string.Format("log {0}.txt", p.Name))));
+                //new LogEncodingRecorder<FrameSbsEncoder>(p, new FileInfo(System.IO.Path.Combine("CanLog", string.Format("log {0}.bin", p.Name))));
+                //new LogEncodingRecorder<FrameTextEncoder>(p, new FileInfo(System.IO.Path.Combine("CanLog", string.Format("log {0}.txt", p.Name))));
+                RegisterNewRecorder(p);
             }
 
             //ppp.Start();
+        }
+
+        private Dictionary<CanPort, LogRecorder> Recorders = new Dictionary<CanPort,LogRecorder>();
+
+        private void RegisterNewRecorder(CanPort forPort)
+        {
+            Recorders.Add(forPort,
+                            new LogEncodingRecorder<FrameSbsEncoder>(forPort,
+                                new FileInfo(System.IO.Path.Combine("CanLog", string.Format("log {0}.bin", forPort.Name)))));
+        }
+
+        void Ports_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            if (e.NewItems != null)
+                foreach (var newPort in e.NewItems.OfType<CanPort>())
+                {
+                    RegisterNewRecorder(newPort);
+                    SniffingWindow.ListeningPorts.Add(newPort);
+                }
+            if (e.OldItems != null)
+                foreach (var removedPort in e.OldItems.OfType<CanPort>())
+                {
+                    Recorders[removedPort].Dispose();
+                    SniffingWindow.ListeningPorts.Remove(removedPort);
+                }
         }
     }
 }

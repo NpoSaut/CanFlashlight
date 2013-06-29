@@ -4,4 +4,5 @@
   <FrameDescription Descriptor="1001" Color="#ffff3000" Name="FLOOD_CONTROL" />
   <FrameDescription Descriptor="8d07" Color="#ffff5000" Name="SYS_DIAGNOSTICS" />
   <FrameDescription Descriptor="0803" Color="#ff0050ff" Name="MCO_MODE" />
+  <FrameDescription Descriptor="4268" Color="#ff40a0ff" Name="MM_LATLON" />
 </ProtocolDescription>

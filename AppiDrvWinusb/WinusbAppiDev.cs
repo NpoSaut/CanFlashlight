@@ -38,6 +38,7 @@ namespace Communications.Appi.Winusb
             : base()
         {
             Device = new USBDevice(di);
+            DevicePath = di.DevicePath;
             ReadPipe = Device.Pipes.First(p => p.IsIn);
             WritePipe = Device.Pipes.First(p => p.IsOut);
             OpenedDevices.Add(this);
@@ -49,9 +50,17 @@ namespace Communications.Appi.Winusb
         /// </summary>
         protected override byte[] ReadBuffer()
         {
-            Byte[] buff = new Byte[BufferSize];
-            ReadPipe.Read(buff);
-            return buff.SkipWhile(b => b == 0).ToArray();
+            try
+            {
+                Byte[] buff = new Byte[BufferSize];
+                ReadPipe.Read(buff);
+                return buff.SkipWhile(b => b == 0).ToArray();
+            }
+            catch (Exception)
+            {
+                this.OnDisconnected();
+                return new byte[0];
+            }
         }
         /// <summary>
         /// Запись буфера
@@ -91,9 +100,9 @@ namespace Communications.Appi.Winusb
 
         public override void Dispose()
         {
+            OpenedDevices.Remove(this);
             base.Dispose();
             Device.Dispose();
-            OpenedDevices.Remove(this);
         }
 
         internal static bool IsDeviceOpened(string DevicePath)
