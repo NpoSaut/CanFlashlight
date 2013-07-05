@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{EC516E9B-29CC-49E3-83B5-19AEC40F6CAA}</ProjectGuid>
+    <ProjectGuid>{3D1978E9-0A08-43F2-956C-B7358275319A}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>UsbCanFlasher</RootNamespace>
-    <AssemblyName>UsbCanFlasher</AssemblyName>
+    <RootNamespace>BlokFramesCodegen</RootNamespace>
+    <AssemblyName>BlokFramesCodegen</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <TargetFrameworkProfile>Client</TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
@@ -41,33 +41,28 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="WinUSBNet">
-      <HintPath>..\WinUsbNet\WinUSBNet.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CanProg.cs" />
+    <Compile Include="CodeGeneration\CodeBlock.cs" />
+    <Compile Include="CodeGeneration\CodeElement.cs" />
+    <Compile Include="CodeGeneration\CodeFramedBlock.cs" />
+    <Compile Include="CodeGeneration\CodeHeaderedBlock.cs" />
+    <Compile Include="CodeGeneration\CodeLine.cs" />
+    <Compile Include="CodeGenerator.cs" />
+    <Compile Include="FrameDescription.cs" />
+    <Compile Include="PropertyDescriptions\NumericPropertyDescription.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="PropertyDescriptions\PropertyDescription.cs" />
+    <Compile Include="PropertyDescriptions\PropertyTypeNameAttribute.cs" />
+    <Compile Include="PropertyPlacement.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\AppiDrvWinusb\AppiDrvWinusb.csproj">
-      <Project>{82EB0C22-FADE-497A-BE09-FFA3624D4E63}</Project>
-      <Name>AppiDrvWinusb</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\AppiWorking\AppiWorking.csproj">
-      <Project>{F0B79856-02E6-41EC-8F95-4AA17604BA11}</Project>
-      <Name>AppiWorking</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\CanLine\CanLine.csproj">
-      <Project>{5BD64D61-F283-4833-B5A0-25EBE435AC89}</Project>
-      <Name>CanLine</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\IsoTP\IsoTP.csproj">
-      <Project>{A45417B6-4547-4E98-B69E-4CB1CFE45F61}</Project>
-      <Name>IsoTP</Name>
-    </ProjectReference>
+    <Content Include="Frames.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

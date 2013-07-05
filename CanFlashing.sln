@@ -19,6 +19,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrackExtractor", "TrackExtr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlokFrames", "BlokFrames\BlokFrames.csproj", "{405B0F26-46EE-4D8C-9267-652F7D4C4AB0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlokFramesCodegen", "BlokFramesCodegen\BlokFramesCodegen.csproj", "{3D1978E9-0A08-43F2-956C-B7358275319A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -109,11 +111,22 @@ Global
 		{405B0F26-46EE-4D8C-9267-652F7D4C4AB0}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{405B0F26-46EE-4D8C-9267-652F7D4C4AB0}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{405B0F26-46EE-4D8C-9267-652F7D4C4AB0}.Release|x86.ActiveCfg = Release|Any CPU
+		{3D1978E9-0A08-43F2-956C-B7358275319A}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{3D1978E9-0A08-43F2-956C-B7358275319A}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
+		{3D1978E9-0A08-43F2-956C-B7358275319A}.Debug|Mixed Platforms.Build.0 = Debug|x86
+		{3D1978E9-0A08-43F2-956C-B7358275319A}.Debug|x86.ActiveCfg = Debug|x86
+		{3D1978E9-0A08-43F2-956C-B7358275319A}.Debug|x86.Build.0 = Debug|x86
+		{3D1978E9-0A08-43F2-956C-B7358275319A}.Release|Any CPU.ActiveCfg = Release|x86
+		{3D1978E9-0A08-43F2-956C-B7358275319A}.Release|Mixed Platforms.ActiveCfg = Release|x86
+		{3D1978E9-0A08-43F2-956C-B7358275319A}.Release|Mixed Platforms.Build.0 = Release|x86
+		{3D1978E9-0A08-43F2-956C-B7358275319A}.Release|x86.ActiveCfg = Release|x86
+		{3D1978E9-0A08-43F2-956C-B7358275319A}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{A28AE116-EC09-4C57-958B-4EFB8B69501A} = {2568981D-B275-4E1D-85BF-0CB9D78207DB}
+		{3D1978E9-0A08-43F2-956C-B7358275319A} = {2568981D-B275-4E1D-85BF-0CB9D78207DB}
 	EndGlobalSection
 EndGlobal

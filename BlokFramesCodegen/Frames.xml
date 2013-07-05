@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Protocol>
+  <Frame Descriptor="0803" Name="MCO_MODE">
+    <Description>
+      Сообщение формируется субмодулем B модуля МЦО нулевого комплекта каждые 500
+    </Description>
+    <P1roperty Name="DriveMode" Description="Режим движения" Type="Enum" Byte="1" Bit="4:2">
+      <Value Key="0" Name="TrainMode" Description="Поездной" />
+      <Value Key="1" Name="ShuntingMode" Description="Маневровый" />
+      <Value Key="2" Name="WorkingMode" Description="Рабочий (Для КЛУБ-УП)" />
+      <Value Key="3" Name="DoublePowerMode" Description="Двойная тяга" />
+    </P1roperty>
+    <P1roperty Name="AutolockMode" Description="Автоблокировочные режимы движения" Type="Enum" Byte="1" Bit="2:2">
+      <Value Key="0" Name="Normal" Description="Обычное движение" />
+      <Value Key="1" Name="HalfAutolock" Description="Маневровый" />
+      <Value Key="2" Name="Autolock" Description="Рабочий (Для КЛУБ-УП)" />
+      <Value Key="3" Name="Forbiddern" Description="Запрещённая комбинация" />
+    </P1roperty>
+    <P1roperty Name="MultipleUnit" Description="Система многих единиц" Type="Boolean" Byte="1" Bit="1" />
+    <P1roperty Name="SautDiag" Description="Диагностика САУТа" Type="Boolean" Byte="1" Bit="0" />
+    <Property Name="RestrictedSpeed" Description="Скорость движения по ПАБу или ЗАБу" Type="Byte" Byte="2" />
+    <Property Name="SlippingSections" Description="Режим движения с подвижными блок-участками" Type="Byte" Byte="3" Bit="7" />
+  </Frame>
+</Protocol>
