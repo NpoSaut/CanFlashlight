@@ -6,7 +6,6 @@ using Communications.Can;
 using Communications.Can.FrameEncoders;
 using System.IO;
 using System.Runtime.InteropServices;
-using GMapElements;
 using BlokFrames;
 using System.Xml.Linq;
 using System.Globalization;
@@ -61,6 +60,11 @@ namespace TrackExtractor
                 MmAltLongFrame PrewPoint = null;
                 DebugCanMetrometer PrewX = null;
 
+                double disstance_x = 0;
+                double disstance_sky = 0;
+
+                DateTime pdt = DateTime.MinValue;
+
                 MmState[] EmapTargets = new MmState[10];
                 DebugMmState[] XxTargets = new DebugMmState[10];
 
@@ -68,7 +72,7 @@ namespace TrackExtractor
                 {
                     switch (f.Descriptor)
                     {
-                        // Точка трека
+                        #region GPS-точка
                         case Dsc_MM_ALT_LONG:
                             var ThisPoint = BlokFrame.GetBlokFrame<MmAltLongFrame>(f);
 
@@ -80,11 +84,15 @@ namespace TrackExtractor
                                     Markers.Add(m);
                                 }
                                 MarkersToBePositioned.Clear();
+
+                                disstance_sky += DistanceTo(new EarthPoint(PrewPoint.Latitude, PrewPoint.Longitude), new EarthPoint(ThisPoint.Latitude, ThisPoint.Longitude));
                             }
 
                             PrewPoint = ThisPoint;
-                            break;
-                                                
+                            break; 
+                        #endregion
+
+                        #region Метрометр
                         case Dsc_METROMETER:
                             var thisX = BlokFrame.GetBlokFrame<DebugCanMetrometer>(f);
 
@@ -95,21 +103,35 @@ namespace TrackExtractor
                             {
                                 Pook(MarkersToBePositioned, PrewX, EmapTargets, thisX, MarkerKind.EmapTarget);
                                 Pook(MarkersToBePositioned, PrewX, XxTargets, thisX, MarkerKind.XxTarget);
+
+                                disstance_x += Math.Abs(thisX.X - PrewX.X);
                             }
 
                             PrewX = thisX;
-                            break;
+                            break; 
+                        #endregion
 
+                        #region Чужая карта
                         case Dsc_MM_STATE:
                             var mmst = BlokFrame.GetBlokFrame<MmState>(f);
                             EmapTargets[mmst.TargetNumber] = mmst;
-                            break;
+                            break; 
+                        #endregion
 
+                        #region Наша карта
                         case Dsc_XX_STATE:
                             var dmmst = BlokFrame.GetBlokFrame<DebugMmState>(f);
+                            if (dmmst.TargetNumber == 0 && XxTargets[0] != null && XxTargets[0].Target.Kind == dmmst.Target.Kind && XxTargets[0].Target.X != dmmst.Target.X)
+                            {
+                                int delta = XxTargets[0].Target.X - dmmst.Target.X;
+                                if (Math.Abs(delta) < 500)
+                                    Console.WriteLine("Произошёл скачок в {0} метров    x = {1}    {2}", delta.ToString().PadLeft(10), (PrewX ?? new DebugCanMetrometer()).X, dmmst.Time.ToString());
+                            }
                             XxTargets[dmmst.TargetNumber] = dmmst;
-                            break;
+                            break; 
+                        #endregion
 
+                        #region Отладочная кнопка
                         // Нажатие отладочной кнопки
                         case Dsc_OBJECT:
                             var debugMess = BlokFrame.GetBlokFrame<DebugCanMessage>(f);
@@ -135,7 +157,14 @@ namespace TrackExtractor
                                     break;
                             }
 
-                            break;
+                            break; 
+                        #endregion
+                    }
+
+                    if (f.Time.Second != pdt.Second && disstance_sky * disstance_x > 0)
+                    {
+                        //Console.WriteLine("{2}\t{0:F0}\t{1:F0}", disstance_x, disstance_sky, f.Time.ToString());
+                        pdt = f.Time;
                     }
                 }
 
@@ -147,6 +176,7 @@ namespace TrackExtractor
                 ExportMarkers(Markers.Where(m => m.Kind == MarkerKind.EmapTarget), Path.Combine(TracksDirectoryPath, "EmapTargets.kml"));
                 ExportMarkers(Markers.Where(m => m.Kind == MarkerKind.XxTarget), Path.Combine(TracksDirectoryPath, "XxTargets.kml"));
             }
+            Console.Read();
         }
 
         private static void Pook(List<MarkerOnTrack> MarkersToBePositioned, DebugCanMetrometer PrewX, MmState[] TargetsArray, DebugCanMetrometer thisX, MarkerKind mk)
@@ -206,6 +236,85 @@ namespace TrackExtractor
                                                                                     m.Point.Longitude, m.Point.Latitude))))))
                     ));
             KMap.Save(FileName);
+        }
+
+
+
+        /// <summary>
+        /// Радиус Земли в метрах
+        /// </summary>
+        public const double c = 6372795;
+        //public const double ε = 1;
+
+
+        /// <summary>
+        /// Возвращает расстояние между точками по теореме гаверсинусов
+        /// </summary>
+        /// <param name="p1">Первая точка</param>
+        /// <param name="p2">Вторая точка</param>
+        /// <returns>Расстояние между точками в метрах</returns>
+        public static Double DistanceTo(EarthPoint p1, EarthPoint p2)
+        {
+            return 2 * c * Math.Asin(Math.Sqrt(EstimateDistances(p1, p2)));
+        }
+
+        public static Double EstimateDistances(EarthPoint p1, EarthPoint p2)
+        {
+            return Math.Pow(Math.Sin((p2.LatitudeRad - p1.LatitudeRad) / 2), 2) + Math.Cos(p1.LatitudeRad) * Math.Cos(p2.LatitudeRad) * Math.Pow(Math.Sin((p2.LongitudeRad - p1.LongitudeRad) / 2), 2);
+        }
+    }
+
+    public class EarthPoint
+    {
+        /// <summary>
+        /// Широта
+        /// </summary>
+        /// <remarks>По Y</remarks>
+        public Double Latitude { get; set; }
+        /// <summary>
+        /// Долгота
+        /// </summary>
+        /// <remarks>По X</remarks>
+        public Double Longitude { get; set; }
+
+
+        #region Перевод в радианы
+        /// <summary>
+        /// Широта (в радианах)
+        /// </summary>
+        /// <remarks>По Y</remarks>
+        public Double LatitudeRad
+        {
+            get { return Latitude * Math.PI / 180.0; }
+            set { Latitude = value * 180.0 / Math.PI; }
+        }
+        /// <summary>
+        /// Долгота (в радианах)
+        /// </summary>
+        /// <remarks>По X</remarks>
+        public Double LongitudeRad
+        {
+            get { return Longitude * Math.PI / 180.0; }
+            set { Longitude = value * 180.0 / Math.PI; }
+        }
+        #endregion
+
+
+
+        /// <summary>
+        /// Создаёт точку с указанной широтой и долготой
+        /// </summary>
+        /// <param name="Latitude">Широта (Y)</param>
+        /// <param name="Longitude">Долгота (X)</param>
+        public EarthPoint(Double Latitude, Double Longitude)
+        {
+            this.Latitude = Latitude;
+            this.Longitude = Longitude;
+        }
+
+        public override string ToString()
+        {
+            return string.Format("{0:F4}   {1:F4}", Longitude, Latitude);
         }
     }
 }
