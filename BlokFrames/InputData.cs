@@ -48,6 +48,14 @@ namespace BlokFrames
             this.Data = BitConverter.ToInt32(new byte[4] { Data[4], Data[3], Data[2], Data[1] }, 0);
         }
 
+        public InputData()
+        { }
+        public InputData(int Index, int Data)
+        {
+            this.Index = Index;
+            this.Data = Data;
+        }
+
         public override string ToString()
         {
             return String.Format("{0} : {1}", Index, Data);

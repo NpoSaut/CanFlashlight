@@ -16,11 +16,11 @@ namespace BlokFrames
         {
             get { return GetDescriptor(this.GetType()); }
         }
-        protected static int GetDescriptor(Type T)
+        public static int GetDescriptor(Type T)
         {
             return T.GetCustomAttributes(typeof(FrameDescriptorAttribute), false).OfType<FrameDescriptorAttribute>().First().Descriptor;
         }
-        protected static int GetDescriptor<T>() where T: BlokFrame
+        public static int GetDescriptor<T>() where T : BlokFrame
         {
             return GetDescriptor(typeof(T));
         }
