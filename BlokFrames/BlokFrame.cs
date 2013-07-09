@@ -10,19 +10,24 @@ namespace BlokFrames
     public abstract class BlokFrame
     {
         /// <summary>
+        /// Полукомплект
+        /// </summary>
+        public HalfsetKind FrameHalfset { get; set; }
+
+        /// <summary>
         /// Дескриптор, соответствующий данному сообщению
         /// </summary>
-        public int Descriptor
+        public IDictionary<HalfsetKind, int> Descriptors
         {
-            get { return GetDescriptor(this.GetType()); }
+            get { return GetDescriptors(this.GetType()); }
         }
-        public static int GetDescriptor(Type T)
+        public static IDictionary<HalfsetKind, int> GetDescriptors(Type T)
         {
-            return T.GetCustomAttributes(typeof(FrameDescriptorAttribute), false).OfType<FrameDescriptorAttribute>().First().Descriptor;
+            return T.GetCustomAttributes(typeof(FrameDescriptorAttribute), false).OfType<FrameDescriptorAttribute>().ToDictionary(a => a.Halfset, a => a.Descriptor);
         }
-        public static int GetDescriptor<T>() where T : BlokFrame
+        public static IDictionary<HalfsetKind, int> GetDescriptors<T>() where T : BlokFrame
         {
-            return GetDescriptor(typeof(T));
+            return GetDescriptors(typeof(T));
         }
 
         protected abstract Byte[] GetCanFrameData();
@@ -34,7 +39,7 @@ namespace BlokFrames
         /// <returns>CAN-фрейм, содержащий данное сообщение</returns>
         public CanFrame GetCanFrame()
         {
-            return CanFrame.NewWithDescriptor(this.Descriptor, this.GetCanFrameData());
+            return CanFrame.NewWithDescriptor(this.Descriptors[this.FrameHalfset], this.GetCanFrameData());
         }
 
         /// <summary>
@@ -46,9 +51,12 @@ namespace BlokFrames
         public static T GetBlokFrame<T>(CanFrame f)
             where T: BlokFrame, new()
         {
-            if (GetDescriptor<T>() != f.Descriptor)
+            HalfsetKind? hs = GetDescriptors<T>().Where(p => p.Value == f.Descriptor).Select(p => p.Key).FirstOrDefault();
+
+            if (!GetDescriptors<T>().Values.Contains(f.Descriptor))
                 throw new DescriptorMismatchException("Дескриптор расшифровываемого фрейма не соответствует дескриптору  типа");
-            var res = new T();
+
+            var res = new T() { FrameHalfset = hs ?? HalfsetKind.Uniset };
             res.FillWithCanFrameData(f.Data);
             return res;
         }

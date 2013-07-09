@@ -41,7 +41,8 @@ namespace BlokFrames
 
         protected override byte[] GetCanFrameData()
         {
-            throw new NotImplementedException();
+            if (Error == ErrorKind.NoError) return base.GetCanFrameData();
+            else return new Byte[] { (byte)(Index | 0x08), 0, 0, 0, (byte)Error };
         }
 
         protected override void FillWithCanFrameData(byte[] Data)

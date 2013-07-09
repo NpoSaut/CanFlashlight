@@ -15,58 +15,59 @@ namespace Communications.Can
     /// </remarks>
     public class CanFramesBuffer : IDisposable
     {
+        private List<int> _Descriptors { get; set; }
         /// <summary>
-        /// Отслеживаемый дескриптор
+        /// Отслеживаемые дескрипторы
         /// </summary>
-        public int Descriptor { get; private set; }
+        public System.Collections.ObjectModel.ReadOnlyCollection<int> Descriptors
+        {
+            get { return _Descriptors.AsReadOnly(); }
+        }
         /// <summary>
         /// Порты, сообщения с которых поступают в буфер
         /// </summary>
-        public IList<CanPort> Ports { get { return Handlers.Keys.ToList(); } }
-        private Dictionary<CanPort, CanFrameHandler> Handlers = new Dictionary<CanPort, CanFrameHandler>();
+        public System.Collections.ObjectModel.ReadOnlyCollection<CanPort> Ports
+        {
+            get { return Handlers.Select(h => h.Port).Distinct().ToList().AsReadOnly(); }
+        }
+        private List<CanFrameHandler> Handlers = new List<CanFrameHandler>();
 
         /// <summary>
         /// Создаёт буфер для отлова сообщений с указанным дескриптором на указанном порту
         /// </summary>
         /// <param name="Descriptor">Отлавливаемый дескриптор</param>
         /// <param name="OnPort"></param>
-        public CanFramesBuffer(int Descriptor, CanPort OnPort)
-            : this(Descriptor, new CanPort[] { OnPort })
+        public CanFramesBuffer(IEnumerable<int> Descriptors, CanPort OnPort)
+            : this(Descriptors, new CanPort[] { OnPort })
         { }
-        public CanFramesBuffer(int Descriptor, IEnumerable<CanPort> OnPorts)
+        public CanFramesBuffer(IEnumerable<int> Descriptors, IEnumerable<CanPort> OnPorts)
         {
-            this.Descriptor = Descriptor;
+            this._Descriptors = Descriptors.ToList();
             foreach (var p in OnPorts) RegisterPort(p);
         }
+        public CanFramesBuffer(int Descriptor, IEnumerable<CanPort> OnPorts)
+            : this(new int[] { Descriptor }, OnPorts)
+        { }
+        public CanFramesBuffer(int Descriptor, CanPort OnPort)
+            : this(new int[] { Descriptor }, new CanPort[] { OnPort })
+        { }
 
         /// <summary>
         /// Добавляет порт в список прослушиваемых
         /// </summary>
         public void RegisterPort(CanPort Port)
         {
-            if (!Handlers.ContainsKey(Port))
+            foreach (var Descriptor in _Descriptors)
             {
                 var h = new CanFrameHandler(Port, Descriptor);
                 h.Recieved += new CanFramesReceiveEventHandler(Handler_FrameRecieved);
-                Handlers.Add(Port, h);
-            }
-        }
-
-        /// <summary>
-        /// Убирает порт из списка прослушиваемых
-        /// </summary>
-        public void UnregisterPort(CanPort Port)
-        {
-            if (Handlers.ContainsKey(Port))
-            {
-                Handlers[Port].Dispose();
-                Handlers.Remove(Port);
+                Handlers.Add(h);
             }
         }
 
         public void Dispose()
         {
-            foreach (var h in Handlers.Values)
+            foreach (var h in Handlers)
                 h.Dispose();
         }
 
