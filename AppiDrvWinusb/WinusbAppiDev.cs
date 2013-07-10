@@ -39,8 +39,8 @@ namespace Communications.Appi.Winusb
         {
             Device = new USBDevice(di);
             DevicePath = di.DevicePath;
-            ReadPipe = Device.Pipes.First(p => p.IsIn);
-            WritePipe = Device.Pipes.First(p => p.IsOut);
+            ReadPipe = Device.Pipes.First(p => p.IsIn);     ReadPipe.Policy.PipeTransferTimeout = 100;
+            WritePipe = Device.Pipes.First(p => p.IsOut);   WritePipe.Policy.PipeTransferTimeout = 100;
             OpenedDevices.Add(this);
         }
 
@@ -100,6 +100,9 @@ namespace Communications.Appi.Winusb
 
         public override void Dispose()
         {
+            ReadPipe.Abort();
+            WritePipe.Abort();
+
             OpenedDevices.Remove(this);
             base.Dispose();
             Device.Dispose();
