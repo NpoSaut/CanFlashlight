@@ -26,6 +26,12 @@ namespace Communications.Appi
         /// </summary>
         public const int BufferSize = 2048;
 
+        // Это число, в некотором роде, является волшебным числом.
+        // Почему-то, иногда после завершения работы с АППИ, оно начинает выдавать свой буфер с некоторым сдвигом.
+        // Тогда размер буфера уменьшается. Но вроде как, он всё равно содержит данные...
+        // TODO: надо бы разобраться со сдвигом этого буфера
+        public const int MinimumRequiredBufferSize = 524+500;
+
         protected abstract Byte[] ReadBuffer();
         protected abstract void WriteBuffer(Byte[] Buffer);
 
@@ -58,7 +64,8 @@ namespace Communications.Appi
                 buff = ReadBuffer();
             }
 
-            if (buff.Length != BufferSize) return AppiMessages.Empty;
+            if (buff.Length < MinimumRequiredBufferSize)
+                return AppiMessages.Empty;
 
             var MessagesInA = buff[6];
             var MessagesInB = buff[2];
