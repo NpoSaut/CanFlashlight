@@ -31,7 +31,7 @@ namespace BlokFrames
                 if (Error == ErrorKind.NoError)
                     return base.Data;
                 else
-                    throw new Exception("МПХ вернул ошибку при чтении данных");
+                    return int.MinValue;
             }
             set
             {
@@ -42,7 +42,7 @@ namespace BlokFrames
         protected override byte[] GetCanFrameData()
         {
             if (Error == ErrorKind.NoError) return base.GetCanFrameData();
-            else return new Byte[] { (byte)(Index | 0x08), 0, 0, 0, (byte)Error };
+            else return new Byte[] { (byte)(Index | 0x08), (byte)Error, 0, 0, 0 };
         }
 
         protected override void FillWithCanFrameData(byte[] Data)
@@ -55,7 +55,7 @@ namespace BlokFrames
             else
             {
                 Index = Data[0] & 0x7F;
-                Error = (ErrorKind)(Data[4]);
+                Error = (ErrorKind)(Data[1]);
             }
         }
 
