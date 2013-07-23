@@ -32,11 +32,11 @@ namespace BlokFrames
 
         public int GetLengthOf<T>() where T : BlokFrame
         {
-            return GetDescriptor<T>() % 20;
+            return GetLengthOf(typeof(T));
         }
         public int GetLengthOf(Type t)
         {
-            return GetDescriptor(t) % 20;
+            return GetDescriptors(t).Values.First() % 20;
         }
         public int FrameLength
         {
