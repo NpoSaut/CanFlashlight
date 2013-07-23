@@ -26,6 +26,12 @@ namespace Communications.Appi
         /// </summary>
         public const int BufferSize = 2048;
 
+        // Это число, в некотором роде, является волшебным числом.
+        // Почему-то, иногда после завершения работы с АППИ, оно начинает выдавать свой буфер с некоторым сдвигом.
+        // Тогда размер буфера уменьшается. Но вроде как, он всё равно содержит данные...
+        // TODO: надо бы разобраться со сдвигом этого буфера
+        public const int MinimumRequiredBufferSize = 524+500;
+
         protected abstract Byte[] ReadBuffer();
         protected abstract void WriteBuffer(Byte[] Buffer);
 
@@ -43,7 +49,11 @@ namespace Communications.Appi
         }
         public virtual void Dispose()
         {
-            if (IsListening) StopListening();
+            lock (DevLocker)
+            {
+                if (IsListening)
+                    StopListening();
+            }
         }
 
         /// <summary>
@@ -58,7 +68,11 @@ namespace Communications.Appi
                 buff = ReadBuffer();
             }
 
-            if (buff.Length != BufferSize) return AppiMessages.Empty;
+            if (buff.Length < MinimumRequiredBufferSize)
+            {
+                Console.Write('~');
+                return AppiMessages.Empty;
+            }
 
             var MessagesInA = buff[6];
             var MessagesInB = buff[2];
@@ -146,7 +160,6 @@ namespace Communications.Appi
         /// Признак действия режима прослушивания линии
         /// </summary>
         public bool IsListening { get; private set; }
-        private object IsListeningSynchronizingObject = new object();
         private System.Threading.Thread ListeningThread;
         /// <summary>
         /// Начать прослушивание линии
@@ -154,10 +167,10 @@ namespace Communications.Appi
         /// <remarks>Запускает отдельный поток для прослушивания линии</remarks>
         public void BeginListen()
         {
-            lock (IsListeningSynchronizingObject)
+            lock (DevLocker)
                 if (!IsListening)
                 {
-                    ListeningThread = new System.Threading.Thread(ListeningLoop);
+                    ListeningThread = new System.Threading.Thread(ListeningLoop) { Name = "Поток прослушивания АППИ" };
                     IsListening = true;
                     ListeningThread.Start();
                 }
@@ -169,7 +182,7 @@ namespace Communications.Appi
         {
             while (true)
             {
-                lock (IsListeningSynchronizingObject)
+                lock (DevLocker)
                 {
                     if (!IsListening) break;
                     else this.ReadMessages();

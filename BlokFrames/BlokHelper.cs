@@ -17,8 +17,7 @@ namespace BlokFrames
         public static IEnumerable<T> OfFrameType<T>(this IEnumerable<CanFrame> FramesFlow)
             where T: BlokFrame, new()
         {
-            var FilteringDescriptors = new HashSet<int>();
-            FilteringDescriptors.Add(BlokFrame.GetDescriptor<T>());
+            var FilteringDescriptors = new HashSet<int>(BlokFrame.GetDescriptors<T>().Values);
             return FramesFlow.Where(f => FilteringDescriptors.Contains(f.Descriptor)).Select(f => BlokFrame.GetBlokFrame<T>(f));
         }
     }

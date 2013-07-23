@@ -44,11 +44,14 @@
     <Compile Include="BlokHelper.cs" />
     <Compile Include="DescriptorMismatchException.cs" />
     <Compile Include="FrameDescriptorAttribute.cs" />
+    <Compile Include="Halfset\HalfsetFrame.cs" />
+    <Compile Include="Halfset\HalfsetValue.cs" />
     <Compile Include="InputData.cs" />
     <Compile Include="MmAltLongFrame.cs" />
     <Compile Include="MmState.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SysData.cs" />
+    <Compile Include="SysDataQuery.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CanLine\CanLine.csproj">
@@ -56,6 +59,7 @@
       <Name>CanLine</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
