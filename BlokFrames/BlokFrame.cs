@@ -30,6 +30,19 @@ namespace BlokFrames
             return GetDescriptors(typeof(T));
         }
 
+        public int GetLengthOf<T>() where T : BlokFrame
+        {
+            return GetDescriptor<T>() % 20;
+        }
+        public int GetLengthOf(Type t)
+        {
+            return GetDescriptor(t) % 20;
+        }
+        public int FrameLength
+        {
+            get { return GetLengthOf(this.GetType()); }
+        }
+
         protected abstract Byte[] GetCanFrameData();
         protected abstract void FillWithCanFrameData(Byte[] Data);
 

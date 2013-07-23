@@ -25,18 +25,18 @@ namespace BlokFramesCodegen.PropertyDescriptions
             else throw new Exception("Формат не поддерживается");
         }
 
-        protected override CodeGeneration.CodeBlock GetPropertyDecoderBody()
+        protected override CodeElement GetPropertyDecoderBody()
         {
             return new CodeBlock()
             {
-                Placement.GetExtractor("buff", "dat", _sizeof()),
-                new CodeLine("return BitConverter.To{0}(dat, 0);", TypeName)
+                Placement.GetExtractor("buff", "raw"),
+                new CodeLine("return unchecked(({0})raw);", TypeName)
             };
         }
 
-        protected override CodeBlock GetPropertyEncoderBody()
+        protected override CodeElement GetPropertyEncoderBody()
         {
-            return new CodeBlock();
+            return Placement.GetSetter("buff", "value");
         }
     }
 }

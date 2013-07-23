@@ -12,6 +12,7 @@ namespace BlokFramesCodegen.CodeGeneration
             CodeLine.Echo(sb, OffsetIndex, "{");
             base.Echo(sb, OffsetIndex + 1);
             CodeLine.Echo(sb, OffsetIndex, "}");
+            CodeLine.Echo(sb, OffsetIndex, "");
         }
 
         public CodeFramedBlock()
@@ -24,5 +25,8 @@ namespace BlokFramesCodegen.CodeGeneration
             foreach (var e in elements)
                 this.SubElements.AddLast(e);
         }
+        public CodeFramedBlock(CodeElement element)
+            : this(new CodeElement[] { element })
+        { }
     }
 }

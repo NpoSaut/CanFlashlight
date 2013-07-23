@@ -60,11 +60,15 @@ namespace BlokFramesCodegen
                 {
                     Properties.Select(p => p.PropertyDefinition),
                     new CodeLine(),
-                    new CodeHeaderedBlock("protected override void FillWithCanFrameData(byte[] buff)")
+                    new CodeHeaderedBlock("protected override void Decode(byte[] buff)")
                     {
                         Properties.Select(p => new CodeLine("this.{0} = Decode{0}(buff);", p.Name))
                     },
-                    new CodeLine(),
+                    new CodeHeaderedBlock("protected override byte[] Encode()")
+                    {
+                        new CodeLine("var buff = new Byte[FrameLength];"),
+                        Properties.Select(p => new CodeLine("Encode{0}(buff, {0});", p.Name))
+                    },
                     Properties.Select(p => new CodeBlock() { p.PropertyDecoder, p.PropertyEncoder })
                 }
             };

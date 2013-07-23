@@ -55,30 +55,26 @@ namespace BlokFramesCodegen.PropertyDescriptions
             }
         }
 
-        protected abstract CodeBlock GetPropertyEncoderBody();
-        public CodeBlock PropertyEncoder
+        protected abstract CodeElement GetPropertyEncoderBody();
+        public CodeElement PropertyEncoder
         {
             get
             {
-                return new CodeBlock()
+                return new CodeHeaderedBlock("private void Encode{0}(Byte[] buff, {1} value)", Name, TypeName)
                 {
-                    new CodeLine("private void Encode{0}(Byte[] buff, {1} value)", Name, TypeName),
-                    new CodeFramedBlock(GetPropertyEncoderBody()),
-                    new CodeLine()
+                    GetPropertyEncoderBody()
                 };
             }
         }
 
-        protected abstract CodeBlock GetPropertyDecoderBody();
-        public CodeBlock PropertyDecoder
+        protected abstract CodeElement GetPropertyDecoderBody();
+        public CodeElement PropertyDecoder
         {
             get
             {
-                return new CodeBlock()
+                return new CodeHeaderedBlock("private {1} Decode{0}(Byte[] buff)", Name, TypeName)
                 {
-                    new CodeLine("private {1} Decode{0}(Byte[] buff)", Name, TypeName),
-                    new CodeFramedBlock(GetPropertyDecoderBody()),
-                    new CodeLine()
+                    GetPropertyDecoderBody()
                 };
             }
         }

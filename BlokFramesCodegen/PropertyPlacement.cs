@@ -26,7 +26,8 @@ namespace BlokFramesCodegen
             //else return GetPlacement<BytePropertyPlacement>(element);
         }
 
-        public abstract CodeElement GetExtractor(string BufferName, string VariableName, int size);
+        public abstract CodeElement GetExtractor(string BufferName, string VariableName);
+        public abstract CodeElement GetSetter(string BufferName, string VariableName);
 
         protected class Position
         {
@@ -42,50 +43,6 @@ namespace BlokFramesCodegen
         }
     }
 
-    public class BytePropertyPlacement : PropertyPlacement
-    {
-        public int ByteOffset { get; set; }
-        public int ByteLength { get; set; }
-
-        protected override void FillFromElement(XElement element)
-        {
-            var p = new Position(element.Attribute("Byte").Value);
-            this.ByteOffset = p.Offset;
-            this.ByteLength = p.Length;
-        }
-
-        public override CodeElement GetExtractor(string BufferName, string VariableName, int size)
-        {
-            return new CodeBlock()
-            {
-                new CodeLine("Byte[] {0} = new Byte[{1}];", VariableName, size),
-                new CodeLine("Buffer.BlockCopy({1}, {2}, {0}, 0, {3});", VariableName, BufferName, ByteOffset, ByteLength)
-            };
-        }
-    }
-    public class BitPropertyPlacement : PropertyPlacement
-    {
-        public int ByteOffset { get; set; }
-        public int BitOffset { get; set; }
-        public int BitLength { get; set; }
-
-        protected override void FillFromElement(XElement element)
-        {
-            var ByteP = new Position(element.Attribute("Byte").Value);
-            this.ByteOffset = ByteP.Offset;
-            var BitP = new Position(element.Attribute("Bit").Value);
-            this.BitOffset = BitP.Offset;
-            this.BitLength = BitP.Length;
-        }
-
-        public override CodeElement GetExtractor(string BufferName, string VariableName, int size)
-        {
-            string LengthMask = ((1 << BitLength) - 1).ToString("X2").ToLower();
-            return new CodeLine("Byte[] {4} = new Byte[] {{ ({0}[{1}] >> {2}) & 0x{3} }};",
-                BufferName, ByteOffset, BitOffset, LengthMask, VariableName);
-        }
-    }
-
     public class CustomPropertyPlacement : PropertyPlacement
     {
         List<BitSection> BitSections;
@@ -96,23 +53,55 @@ namespace BlokFramesCodegen
                 .Select(s => new BitSection(s)).ToList();
         }
 
-        public override CodeElement GetExtractor(string BufferName, string VariableName, int size)
+        public override CodeElement GetExtractor(string BufferName, string VariableName)
         {
             int position = 0;
             var boogles = new List<string>();
-            for (int i = 0; i < BitSections.Count; i++)
+            foreach (var s in BitSections)
             {
-                BitSection s = BitSections[i];
-                var mask = "0x" + s.GetMask().ToString("X2");
-                var str = string.Format("buff[{0}] & {1}", s.Start.ByteOffset, mask);
-                if (position - s.Start.BitOffset != 0)
-                {
-                    str = string.Format("({0}) << {1}", str, position - s.Start.BitOffset);
-                }
+                string str = string.Format("{0}[{1}]", BufferName, s.Start.ByteOffset);
+                str = ApplyMask(str, s.GetMask());
+                str = ApplyShift(str, position - s.Start.BitOffset);
+
                 boogles.Add(str);
                 position += s.Length;
             }
-            return new CodeLine("Int64 {0} = {1};", VariableName, string.Join(" | ", boogles.Select(b => "(" + b + ")")));
+            return new CodeLine("UInt64 {0} = {1};", VariableName, string.Join(" | ", boogles));
+        }
+
+        private String ApplyMask(string str, int mask)
+        {
+            if (mask == 0xff) return str;
+            else return str = string.Format("({0} & 0x{1:x2})", str, mask);
+        }
+        private String ApplyShift(string str, int shift)
+        {
+            if (shift == 0) return str;
+            else return string.Format("({0} {1} {2})", str, shift >= 0 ? "<<" : ">>", Math.Abs(shift));
+        }
+
+        public override CodeElement GetSetter(string BufferName, string VariableName)
+        {
+            CodeBlock res = new CodeBlock();
+            int position = 0;
+            foreach (var sec in BitSections)
+            {
+                res.Add(SetValueString(
+                    string.Format("{0}[{1}]", BufferName, sec.Start.ByteOffset),
+                    ApplyShift(VariableName, -position),
+                    sec.GetMask()));
+
+                position += sec.Length;
+
+                //buff[3] = (byte)((buff[3] & ~ByteMask) | ((val >> sec.Start.ByteOffset*8) & ByteMask));
+            }
+            return res;
+        }
+
+        private string SetValueString(string recipient, string val, int mask)
+        {
+            if (mask == 0xff) return string.Format("{0} = (byte)({1} & 0x{2:x2})", recipient, val, mask);
+            else return string.Format("{0} = (byte)(({0} & ~0x{2:x2}) | ({1} & 0x{2:x2}))", recipient, val, mask);
         }
     }
 
@@ -132,7 +121,7 @@ namespace BlokFramesCodegen
         public BitPosition(String str)
         {
             var ss = str.Split(new char[] { '.' });
-            ByteOffset = Int32.Parse(ss[0]);
+            ByteOffset = Int32.Parse(ss[0]) - 1;
             BitOffset = ss.Length > 1 ? Int32.Parse(ss[1]) : -1;
         }
     }
@@ -161,8 +150,12 @@ namespace BlokFramesCodegen
             if (ss.Length > 1) End = new BitPosition(ss[1]);
             else
             {
-                Start.BitOffset = 0;
-                End = new BitPosition(Start.ByteOffset, 7);
+                if (Start.BitOffset == -1)
+                {
+                    Start.BitOffset = 0;
+                    End = new BitPosition(Start.ByteOffset, 7);
+                }
+                else End = new BitPosition(Start.ByteOffset, Start.BitOffset);
             }
         }
 
