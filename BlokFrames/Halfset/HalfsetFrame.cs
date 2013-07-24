@@ -9,18 +9,16 @@ namespace BlokFrames.Halfset
     public class HalfsetFrame<FT> : HalfsetValue<FT>
         where FT : BlokFrame, new()
     {
-        public TimeSpan TimeOut { get; set; }
-
         public HalfsetFrame()
             : base()
         {
-            TimeOut = TimeSpan.FromSeconds(2);
         }
 
         public override bool IsValid
         {
             get
             {
+                if (ValueA == null || ValueB == null) return false;
                 return Enumerable.SequenceEqual(ValueA.GetCanFrame().Data, ValueB.GetCanFrame().Data);
             }
         }
@@ -44,17 +42,26 @@ namespace BlokFrames.Halfset
                 throw new NonHalfsetFrameException();
 
             FT a = null, b = null;
-            foreach (var f in frames)
+            try
             {
-                if (f.FrameHalfset == HalfsetKind.SetA) a = f;
-                if (f.FrameHalfset == HalfsetKind.SetB) b = f;
-                if (a != null && b != null) break;
+                foreach (var f in frames)
+                {
+                    if (f.FrameHalfset == HalfsetKind.SetA) a = f;
+                    if (f.FrameHalfset == HalfsetKind.SetB) b = f;
+                    if (a != null && b != null) break;
+                }
+            }
+            catch (TimeoutException te)
+            {
+                // Если ответил хотя бы один полукомплект, значит, связь есть
+                // и второй полукомплект просто сдох
+                if (a == null && b == null) throw;
             }
             return new HalfsetFrame<FT>() { ValueA = a, ValueB = b };
         }
 
         /// <summary>
-        /// Сообщение не является двухколукомплектным
+        /// Сообщение не является двухполукомплектным
         /// </summary>
         [Serializable]
         public class NonHalfsetFrameException : Exception
