@@ -49,7 +49,7 @@ namespace BlokFrames.Halfset
         /// <summary>
         /// Общее для полукомплектов значение, если таковое валидно
         /// </summary>
-        public T Value
+        public virtual T Value
         {
             get
             {
@@ -61,6 +61,24 @@ namespace BlokFrames.Halfset
         public static implicit operator T(HalfsetValue<T> hsv)
         {
             return hsv.Value;
+        }
+
+        public override string ToString()
+        {
+            if (IsValid) return Value.ToString();
+            else return string.Format("{0} / {1}", ValueA, ValueB);
+        }
+        public override int GetHashCode()
+        {
+            return ValueA.GetHashCode() ^ ValueB.GetHashCode();
+        }
+        public override bool Equals(object obj)
+        {
+            var hs = obj as HalfsetValue<T>;
+            if (hs == null) return false;
+            return
+                this.ValueA.Equals(hs.ValueA) &&
+                this.ValueB.Equals(hs.ValueB);
         }
     }
 
