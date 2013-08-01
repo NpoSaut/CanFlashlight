@@ -43,6 +43,7 @@
     <Compile Include="Frames\ConsecutiveFrame.cs" />
     <Compile Include="Frames\FirstFrame.cs" />
     <Compile Include="Frames\FlowControlFrame.cs" />
+    <Compile Include="IsoTp.cs" />
     <Compile Include="IsoTpTransactionAbortedException.cs" />
     <Compile Include="IsoTpTransactionReuseException.cs" />
     <Compile Include="Frames\SingleFrame.cs" />

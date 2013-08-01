@@ -28,6 +28,7 @@ namespace Communications.Protocols.IsoTP
         /// Время ожидания пакета
         /// </summary>
         public TimeSpan Timeout { get; set; }
+        public const TimeSpan DefaultTimeout = TimeSpan.FromSeconds(3);
 
         private TpTransactionStatus _Status;
         public event EventHandler StatusChanged;
@@ -52,8 +53,16 @@ namespace Communications.Protocols.IsoTP
             this.TransmitDescriptor = TransmitDescriptor;
             this.AcknowlegmentDescriptor = AcknowlegmentDescriptor;
             this.Port = Port;
-            this.Timeout = TimeSpan.FromSeconds(3);
+            this.Timeout = DefaultTimeout;
             this.Status = TpTransactionStatus.Ready;
+        }
+
+        public void Wait()
+        {
+            if (Status == TpTransactionStatus.Ready)
+                throw new ApplicationException("Транзакция ещё не запущена");
+
+            System.Threading.SpinWait.SpinUntil(() => Status == TpTransactionStatus.Active);
         }
     }
 }

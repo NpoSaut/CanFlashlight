@@ -7,7 +7,7 @@ using Communications.Protocols.IsoTP.Frames;
 
 namespace Communications.Protocols.IsoTP
 {
-    public class TpRecieveTransaction : TpTransaction
+    public class TpReceiveTransaction : TpTransaction
     {
         /// <summary>
         /// Буфер приёма пакета
@@ -25,17 +25,31 @@ namespace Communications.Protocols.IsoTP
         public TimeSpan SeparationTime { get; set; }
         public Byte BlockSize { get; set; }
 
-        public TpRecieveTransaction(CanPort Port, int TransmitDescriptor, int AcknowlegmentDescriptor)
+        /// <summary>
+        /// Возвращает полученные данные. Блокирует текущий поток, пока данные не будут получены.
+        /// </summary>
+        public Byte[] Data
+        {
+            get
+            {
+                Wait();
+                return Buff;
+            }
+        }
+
+        public TpReceiveTransaction(CanPort Port, int TransmitDescriptor, int AcknowlegmentDescriptor)
             : base(Port, TransmitDescriptor, AcknowlegmentDescriptor)
         {
             this.SeparationTime = TimeSpan.Zero;
             this.BlockSize = 20;
         }
 
-        public Byte[] Recieve()
+        public Byte[] Receive()
         {
             if (this.Status != TpTransactionStatus.Ready) throw new IsoTpTransactionReuseException(this);
             this.Status = TpTransactionStatus.Active;
+
+            bool TransactionStarted = false;
 
             using (var FramesReader = new CanFramesBuffer(TransmitDescriptor, Port))
             {
@@ -60,6 +74,7 @@ namespace Communications.Protocols.IsoTP
                             return ((SingleFrame)f).Data;
                         }
                     }
+                    TransactionStarted = true;
 
                     // После того, как поймали первый кадр - подготавливаем буфер
                     Buff = new Byte[First.PacketSize];
@@ -77,9 +92,10 @@ namespace Communications.Protocols.IsoTP
                 }
                 catch
                 {
-                    // При любой ошибке отправляем пакет отмены передачи
                     this.Status = TpTransactionStatus.Error;
-                    Port.Send(FlowControlFrame.AbortFrame.GetCanFrame(AcknowlegmentDescriptor));
+                    // Если в процессе передачи возникла ошибка, отправляем отмену
+                    if (TransactionStarted)
+                        Port.Send(FlowControlFrame.AbortFrame.GetCanFrame(AcknowlegmentDescriptor));
                     throw;      // и пробрасываем ошибку дальше по стеку
                 }
             }
