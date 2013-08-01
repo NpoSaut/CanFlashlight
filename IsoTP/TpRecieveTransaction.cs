@@ -46,11 +46,20 @@ namespace Communications.Protocols.IsoTP
                 try
                 {
                     // Ждём первого кадра передачи
-                    var First = FramesStream
-                                    .Where(f => f.GetIsoTpFrameType() == IsoTpFrameType.First)
-                                    //.Cast<FirstFrame>()
-                                    .Select(f => (FirstFrame)f)
-                                    .First();
+                    FirstFrame First = null;
+                    foreach (var f in FramesStream)
+                    {
+                        var ft = f.GetIsoTpFrameType();
+                        if (ft == IsoTpFrameType.First)
+                        {
+                            First = (FirstFrame)f;
+                            break;
+                        }
+                        if (ft == IsoTpFrameType.Single)
+                        {
+                            return ((SingleFrame)f).Data;
+                        }
+                    }
 
                     // После того, как поймали первый кадр - подготавливаем буфер
                     Buff = new Byte[First.PacketSize];

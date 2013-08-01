@@ -51,6 +51,9 @@ namespace Communications.Can
         public CanFramesBuffer(int Descriptor, CanPort OnPort)
             : this(new int[] { Descriptor }, new CanPort[] { OnPort })
         { }
+        public CanFramesBuffer(CanPort OnPort, params int[] Descriptors)
+            : this(Descriptors, OnPort)
+        { }
 
         /// <summary>
         /// Добавляет порт в список прослушиваемых

@@ -25,6 +25,14 @@ namespace Communications.Protocols.IsoTP
             this.Status = TpTransactionStatus.Active;
             this.Buff = Packet.Data;
 
+            if (Buff.Length <= Frames.SingleFrame.DataCapacity) SendSingle();
+            else SendFlow();
+
+            this.Status = TpTransactionStatus.Done;
+        }
+
+        private void SendFlow()
+        {
             using (var FramesReader = new CanFramesBuffer(AcknowlegmentDescriptor, Port))
             {
                 var AckStream = FramesReader.Read(Timeout, true);
@@ -44,7 +52,7 @@ namespace Communications.Protocols.IsoTP
 
                         // Берём блок
                         var Block = PushingCanFrames.Take(BlockSize).ToList();
-                            
+
                         // Отправляем его либо сразу, либо с SeparationTime
                         if (SeparationTime == TimeSpan.Zero)
                             Port.Send(Block);
@@ -63,6 +71,20 @@ namespace Communications.Protocols.IsoTP
                     this.Status = TpTransactionStatus.Error;
                     throw;
                 }
+            }
+        }
+
+        private void SendSingle()
+        {
+            try
+            {
+                var f = new SingleFrame(Buff);
+                Port.Send(f.GetCanFrame(TransmitDescriptor));
+            }
+            catch (Exception)
+            {
+                this.Status = TpTransactionStatus.Error;
+                throw;
             }
         }
 
