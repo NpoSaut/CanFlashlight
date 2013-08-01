@@ -11,6 +11,16 @@ namespace Communications.Appi.Winusb
     /// </summary>
     public class WinusbAppiDev : AppiDev
     {
+        /// <summary>
+        /// GUID устройства
+        /// </summary>
+        public readonly static List<string> DeviceGuids = new List<string>()
+        {
+            "524cc09a-0a72-4d06-980e-afee3131196e",
+            "3af3f480-41b5-4c24-b2a9-6aacf7de3d01"
+        };
+        //public const string DeviceGuid = "524cc09a-0a72-4d06-980e-afee3131196e";
+        //public const string DeviceGuid = "3af3f480-41b5-4c24-b2a9-6aacf7de3d01";
         private String DevicePath { get; set; }
         /// <summary>
         /// USB-устройство
@@ -31,7 +41,8 @@ namespace Communications.Appi.Winusb
         /// <returns></returns>
         public static IList<AppiDeviceSlot> GetDevices()
         {
-            return USBDevice.GetDevices(DeviceGuid).Select(di => new WinusbAppiDeviceSlot(di)).Cast<AppiDeviceSlot>().ToList();
+            return DeviceGuids.SelectMany(DeviceGuid =>
+                USBDevice.GetDevices(DeviceGuid).Select(di => new WinusbAppiDeviceSlot(di)).Cast<AppiDeviceSlot>()).ToList();
         }
 
         internal WinusbAppiDev(USBDeviceInfo di)

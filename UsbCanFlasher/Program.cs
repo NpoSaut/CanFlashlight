@@ -51,6 +51,10 @@ namespace UsbCanFlasher
                     //Byte[] data = new Byte[4095];
                     //(new Random()).NextBytes(data);
 
+                    Console.WriteLine("Отправка с дескриптором {0:X4}", 0x3008);
+                    Console.WriteLine("Жду ответа с дескриптором {0:X4}", 0x4008);
+                    Console.WriteLine("Дебаг: {0:X4}", 0x8008);
+
                     TpPacket sp = new TpPacket(data);
                     TpSendTransaction st = new TpSendTransaction(d.Ports[AppiLine.Can1], 0x3008, 0x4008);
                     Console.WriteLine("Начинаем отправку");
@@ -85,14 +89,15 @@ namespace UsbCanFlasher
         private static Dictionary<int, ConsoleColor> hls = new Dictionary<int, ConsoleColor>()
         {
             { 0x3008, ConsoleColor.Cyan },
-            { 0x4008, ConsoleColor.Yellow }
+            { 0x4008, ConsoleColor.Yellow },
+            { 0x8008, ConsoleColor.Magenta }
         };
 
         static DateTime ddd = DateTime.Now;
         static void Program_Recieved(object sender, CanFramesReceiveEventArgs e)
         {
-            //foreach (var f in e.Frames.Where(f => hls.ContainsKey(f.Descriptor)))
-            foreach (var f in e.Frames)
+            foreach (var f in e.Frames.Where(f => hls.ContainsKey(f.Descriptor)))
+            //foreach (var f in e.Frames)
             {
                 Console.ForegroundColor = ConsoleColor.DarkGreen;
                 Console.Write("{0}мс ", (DateTime.Now - ddd).TotalMilliseconds.ToString("F0").PadLeft(3));

@@ -18,10 +18,6 @@ namespace Communications.Appi
     public abstract class AppiDev : IDisposable
     {
         /// <summary>
-        /// GUID устройства
-        /// </summary>
-        public const string DeviceGuid = "524cc09a-0a72-4d06-980e-afee3131196e";
-        /// <summary>
         /// Размер буфера
         /// </summary>
         public const int BufferSize = 2048;
