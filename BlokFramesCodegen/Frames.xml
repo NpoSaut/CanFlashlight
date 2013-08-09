@@ -4,19 +4,19 @@
     <Description>
       Сообщение формируется субмодулем B модуля МЦО нулевого комплекта каждые 500
     </Description>
-    <P1roperty Name="DriveMode" Description="Режим движения" Type="Enum" Byte="1" Bit="4:2">
+    <Property Name="DriveMode" Description="Режим движения" Type="Enum" Placement="1.4-1.5" Byte="1" Bit="4:2">
       <Value Key="0" Name="TrainMode" Description="Поездной" />
       <Value Key="1" Name="ShuntingMode" Description="Маневровый" />
       <Value Key="2" Name="WorkingMode" Description="Рабочий (Для КЛУБ-УП)" />
       <Value Key="3" Name="DoublePowerMode" Description="Двойная тяга" />
-    </P1roperty>
-    <P1roperty Name="AutolockMode" Description="Автоблокировочные режимы движения" Type="Enum" Byte="1" Bit="2:2">
+    </Property>
+    <Property Name="AutolockMode" Description="Автоблокировочный режим движения" Type="Enum" Placement="1.2-1.3">
       <Value Key="0" Name="Normal" Description="Обычное движение" />
-      <Value Key="1" Name="HalfAutolock" Description="Маневровый" />
-      <Value Key="2" Name="Autolock" Description="Рабочий (Для КЛУБ-УП)" />
+      <Value Key="1" Name="HalfAutolock" Description="Движение по ПАБу" />
+      <Value Key="2" Name="Autolock" Description="Движение по закрытой АБ" />
       <Value Key="3" Name="Forbiddern" Description="Запрещённая комбинация" />
-    </P1roperty>
-    <P1roperty Name="MultipleUnit" Description="Система многих единиц" Type="Boolean" Byte="1" Bit="1" />
+    </Property>
+    <Property Name="MultipleUnit" Description="Система многих единиц" Type="Boolean" Placement="1.1" />
     <Property Name="SautDiag" Description="Диагностика САУТа" Type="Boolean" Placement="1.0" />
     <Property Name="RestrictedSpeed" Description="Скорость движения по ПАБу или ЗАБу" Type="Byte" Placement="2.0-2.5 3.1-3.3" />
     <Property Name="SlippingSections" Description="Режим движения с подвижными блок-участками" Type="Boolean" Placement="3.7" />

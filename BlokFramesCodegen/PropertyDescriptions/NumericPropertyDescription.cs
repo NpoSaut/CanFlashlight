@@ -10,13 +10,6 @@ namespace BlokFramesCodegen.PropertyDescriptions
     [PropertyTypeName("int", "int32", "uint32", "int16", "uint16", "byte")]
     public class NumericPropertyDescription : PropertyDescription
     {
-        public PropertyPlacement Placement { get; set; }
-
-        protected override void FillFromXml(XElement XPropertyDescription)
-        {
-            Placement = PropertyPlacement.GetPlacement(XPropertyDescription);
-        }
-
         private int _sizeof()
         {
             if (TypeName.Contains("32")) return 4;

@@ -10,13 +10,6 @@ namespace BlokFramesCodegen.PropertyDescriptions
     [PropertyTypeName("Boolean")]
     public class BooleanPropertyDescription : PropertyDescription
     {
-        public PropertyPlacement Placement { get; private set; }
-
-        protected override void FillFromXml(XElement XPropertyDescription)
-        {
-            Placement = PropertyPlacement.GetPlacement(XPropertyDescription);
-        }
-
         protected override CodeGeneration.CodeElement GetPropertyEncoderBody()
         {
             return Placement.GetSetter("buff", "value");

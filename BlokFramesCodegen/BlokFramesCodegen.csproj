@@ -51,6 +51,7 @@
     <Compile Include="CodeGenerator.cs" />
     <Compile Include="FrameDescription.cs" />
     <Compile Include="PropertyDescriptions\BooleanPropertyDescription.cs" />
+    <Compile Include="PropertyDescriptions\EnumPropertyDescription.cs" />
     <Compile Include="PropertyDescriptions\NumericPropertyDescription.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
