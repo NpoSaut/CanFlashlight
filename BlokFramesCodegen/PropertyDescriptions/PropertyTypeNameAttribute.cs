@@ -12,12 +12,11 @@ namespace BlokFramesCodegen.PropertyDescriptions
 
         public PropertyTypeNameAttribute(params string[] TypeNames)
         {
-            this.TypeNames = new HashSet<string>(TypeNames);
+            this.TypeNames = new HashSet<string>(TypeNames.Select(n => n.ToLower()));
         }
         public PropertyTypeNameAttribute(String TypeName)
-        {
-            this.TypeNames = new HashSet<string>() { TypeName };
-        }
+            : this(new String[] { TypeName })
+        { }
 
         public static PropertyTypeNameAttribute Get(Type t)
         {

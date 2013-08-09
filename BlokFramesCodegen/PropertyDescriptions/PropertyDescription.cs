@@ -38,7 +38,10 @@ namespace BlokFramesCodegen.PropertyDescriptions
             if (GetPropertyTypenames<NumericPropertyDescription>().Contains(LowerTypeName))
                 return GetProperty<NumericPropertyDescription>(XPropertyDescription);
 
-            else return null; //throw new Exception("Неподдерживаемый тип свойства");
+            else if (GetPropertyTypenames<BooleanPropertyDescription>().Contains(LowerTypeName))
+                return GetProperty<BooleanPropertyDescription>(XPropertyDescription);
+
+            else throw new Exception("Не поддерживаемый тип свойства");
         }
 
         public virtual CodeBlock PropertyDefinition
@@ -89,5 +92,10 @@ namespace BlokFramesCodegen.PropertyDescriptions
             return GetPropertyTypenames(typeof(T));
         }
         #endregion
+
+        public override string ToString()
+        {
+            return string.Format("{0} ({1})", Name, TypeName);
+        }
     }
 }
