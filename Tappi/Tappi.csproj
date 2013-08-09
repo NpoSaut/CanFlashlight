@@ -57,6 +57,10 @@
       <Project>{F0B79856-02E6-41EC-8F95-4AA17604BA11}</Project>
       <Name>AppiWorking</Name>
     </ProjectReference>
+    <ProjectReference Include="..\BlokFrames\BlokFrames.csproj">
+      <Project>{405B0F26-46EE-4D8C-9267-652F7D4C4AB0}</Project>
+      <Name>BlokFrames</Name>
+    </ProjectReference>
     <ProjectReference Include="..\CanLine\CanLine.csproj">
       <Project>{5BD64D61-F283-4833-B5A0-25EBE435AC89}</Project>
       <Name>CanLine</Name>

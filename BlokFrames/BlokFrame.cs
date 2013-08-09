@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Communications.Can;
 using System.Runtime.InteropServices;
+using System.Reflection;
 
 namespace BlokFrames
 {
@@ -43,8 +44,8 @@ namespace BlokFrames
             get { return GetLengthOf(this.GetType()); }
         }
 
-        protected abstract Byte[] GetCanFrameData();
-        protected abstract void FillWithCanFrameData(Byte[] Data);
+        protected abstract Byte[] Encode();
+        protected abstract void Decode(Byte[] Data);
 
         /// <summary>
         /// Создаёт CAN-фрейм, содержащий данное сообщение
@@ -52,7 +53,7 @@ namespace BlokFrames
         /// <returns>CAN-фрейм, содержащий данное сообщение</returns>
         public CanFrame GetCanFrame()
         {
-            return CanFrame.NewWithDescriptor(this.Descriptors[this.FrameHalfset], this.GetCanFrameData());
+            return CanFrame.NewWithDescriptor(this.Descriptors[this.FrameHalfset], this.Encode());
         }
 
         /// <summary>
@@ -70,7 +71,17 @@ namespace BlokFrames
                 throw new DescriptorMismatchException("Дескриптор расшифровываемого фрейма не соответствует дескриптору  типа");
 
             var res = new T() { FrameHalfset = hs ?? HalfsetKind.Uniset };
-            res.FillWithCanFrameData(f.Data);
+            res.Decode(f.Data);
+            return res;
+        }
+        public static BlokFrame GetBlokFrame(CanFrame f)
+        {
+            if (!FrameTypes.ContainsKey(f.Descriptor))
+                throw new ApplicationException("Не найдено описание сообщения с таким дескриптором");
+
+            Type t = FrameTypes[f.Descriptor];
+            var res = (BlokFrame)t.GetConstructor(new Type[0]).Invoke(new object[0]);
+            res.Decode(f.Data);
             return res;
         }
 
@@ -92,6 +103,20 @@ namespace BlokFrames
             T stuff = (T)Marshal.PtrToStructure(handle.AddrOfPinnedObject(), typeof(T));
             handle.Free();
             return stuff;
+        }
+
+        private static Dictionary<int, Type> _FrameTypes = GetBlockFrameTypes();
+        public static Dictionary<int, Type> FrameTypes
+        {
+            get { return _FrameTypes; }
+        }
+        private static Dictionary<int, Type> GetBlockFrameTypes()
+        {
+            return
+                Assembly.GetExecutingAssembly().GetTypes()
+                    .Where(t => t.IsSubclassOf(typeof(BlokFrame)))
+                    .SelectMany(t => GetDescriptors(t).Select(d => new { d = d.Value, t }))
+                    .ToDictionary(td => td.d, td => td.t);
         }
     }
 }

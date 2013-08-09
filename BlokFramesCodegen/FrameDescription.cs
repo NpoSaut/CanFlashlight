@@ -52,6 +52,7 @@ namespace BlokFramesCodegen
         {
             return new CodeBlock()
             {
+                new CodeLine("[FrameDescriptor(0x{0:x4})]", Descriptor),
                 new CodeLine("/// <summary>"),
                 new CodeLine("/// {0}", Description),
                 new CodeLine("/// <summary>"),
@@ -67,7 +68,8 @@ namespace BlokFramesCodegen
                     new CodeHeaderedBlock("protected override byte[] Encode()")
                     {
                         new CodeLine("var buff = new Byte[FrameLength];"),
-                        Properties.Select(p => new CodeLine("Encode{0}(buff, {0});", p.Name))
+                        Properties.Select(p => new CodeLine("Encode{0}(buff, {0});", p.Name)),
+                        new CodeLine("return buff;")
                     },
                     Properties.Select(p => new CodeBlock() { p.PropertyDecoder, p.PropertyEncoder })
                 }

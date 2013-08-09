@@ -109,7 +109,7 @@ namespace BlokFrames
         /// </summary>
         public MapTarget Target { get; set; }
 
-        protected override byte[] GetCanFrameData()
+        protected override byte[] Encode()
         {
             int[] data =
                 new int[]
@@ -134,7 +134,7 @@ namespace BlokFrames
             return data.Cast<byte>().ToArray();
         }
 
-        protected override void FillWithCanFrameData(byte[] Data)
+        protected override void Decode(byte[] Data)
         {
             InMap = (Data[0] == 0);
             Good = true;

@@ -4,7 +4,7 @@
     <Description>
       Сообщение формируется субмодулем B модуля МЦО нулевого комплекта каждые 500
     </Description>
-    <Property Name="DriveMode" Description="Режим движения" Type="Enum" Placement="1.4-1.5" Byte="1" Bit="4:2">
+    <Property Name="DriveMode" Description="Режим движения" Type="Enum" Placement="1.4-1.5">
       <Value Key="0" Name="TrainMode" Description="Поездной" />
       <Value Key="1" Name="ShuntingMode" Description="Маневровый" />
       <Value Key="2" Name="WorkingMode" Description="Рабочий (Для КЛУБ-УП)" />
@@ -20,5 +20,50 @@
     <Property Name="SautDiag" Description="Диагностика САУТа" Type="Boolean" Placement="1.0" />
     <Property Name="RestrictedSpeed" Description="Скорость движения по ПАБу или ЗАБу" Type="Byte" Placement="2.0-2.5 3.1-3.3" />
     <Property Name="SlippingSections" Description="Режим движения с подвижными блок-участками" Type="Boolean" Placement="3.7" />
+  </Frame>
+  <Frame Descriptor="1888" Name="IPD_STATE">
+    <Description>
+      Описание параметров движения
+    </Description>
+    <Property Placement="1.4-1.7" Type="int" Name="TestNumber" Description="Номер выполненного теста" />
+    <Property Placement="1.0-1.3" Type="int" Name="TestResult" Description="Результат теста" />
+    <Property Placement="2.7" Type="Enum" Name="Direction" Description="Направление движения">
+      <Value Key="0" Name="Ahead" Description="Вперёд" />
+      <Value Key="1" Name="Back" Description="Назад" />
+    </Property>
+    <Property Placement="2.5" Type="Enum" Name="AccelerationSign" Description="Знак ускорения">
+      <Value Key="0" Name="Positive" Description="Положительное" />
+      <Value Key="1" Name="Negative" Description="Отрицательное" />
+    </Property>
+    <Property Placement="2.2" Type="Boolean" Name="SpeedPulsesAvailable" Description="Наличие импульсов ДПС" />
+    <Property Placement="3.0-3.7 2.0" Type="int" Name="Speed" Description="Фактическая скорость" />
+    <Property Placement="5.0-5.7 4.0-4.7 6.0-6.7" Type="int" Name="LinearOrdinate" Description="Линейная ордината" />
+    <Property Placement="7.7" Type="Boolean" Name="IsVirtualCabine" Description="Признак виртуальной кабины" />
+    <Property Placement="7.6" Type="Enum" Name="VirtualCabine" Description="Номер виртуальной кабины">
+      <Value Key="0" Name="Cabine1" Description="1 кабина" />
+      <Value Key="1" Name="Cabine2" Description="2 кабина" />
+    </Property>
+    <Property Placement="7.5" Type="Boolean" Name="EmapPosition" Description="Определение местоположения в ЭК" />
+    <Property Placement="7.4" Type="Enum" Name="PassiveSensorSpeedTestState" Description="Тест пассивного датчика по скорости">
+      <Value Key="0" Name="Correct" Description="Исправен" />
+      <Value Key="1" Name="Fault" Description="Сбой" />
+    </Property>
+    <Property Placement="7.3" Type="Enum" Name="ActiveSpeedSensor" Description="Номер активного датчика">
+      <Value Key="0" Name="Sensor1" Description="Датчик 1" />
+      <Value Key="1" Name="Sensor2" Description="Датчик 2" />
+    </Property>
+    <Property Placement="7.2" Type="Enum" Name="PassiveSensorImpulseTestState" Description="Тест пассивного датчика по количеству импульсов">
+      <Value Key="0" Name="Correct" Description="Исправен" />
+      <Value Key="1" Name="Fault" Description="Сбой" />
+      <Property Placement="7.1" Type="Enum" Name="ActiveSensorSpeedTestState" Description="Тест активного датчика по скорости">
+        <Value Key="0" Name="Correct" Description="Исправен" />
+        <Value Key="1" Name="Fault" Description="Сбой" />
+      </Property>
+      <Property Placement="7.0" Type="Enum" Name="ActiveSensorImpulseTestState" Description="Тест активного датчика по количеству импульсов">
+        <Value Key="0" Name="Correct" Description="Исправен" />
+        <Value Key="1" Name="Fault" Description="Сбой" />
+      </Property>
+      <Property Placement="8.0-8.7" Type="int" Name="AccelerationModule" Description="Значение модуля ускорения" />
+    </Property>
   </Frame>
 </Protocol>

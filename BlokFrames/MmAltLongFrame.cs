@@ -45,12 +45,12 @@ namespace BlokFrames
         } 
         #endregion
 
-        protected override byte[] GetCanFrameData()
+        protected override byte[] Encode()
         {
             throw new NotImplementedException();
         }
 
-        protected override void FillWithCanFrameData(byte[] Data)
+        protected override void Decode(byte[] Data)
         {
             var ds = ByteArrayToStructure<DataStruct>(Data);
             this.Latitude = ds.Lat * 10e-9 * 180 / Math.PI;

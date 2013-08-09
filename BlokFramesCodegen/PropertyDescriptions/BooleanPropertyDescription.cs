@@ -12,7 +12,7 @@ namespace BlokFramesCodegen.PropertyDescriptions
     {
         protected override CodeGeneration.CodeElement GetPropertyEncoderBody()
         {
-            return Placement.GetSetter("buff", "value");
+            return Placement.GetSetter("buff", "(value ? 1 : 0)");
         }
 
         protected override CodeGeneration.CodeElement GetPropertyDecoderBody()

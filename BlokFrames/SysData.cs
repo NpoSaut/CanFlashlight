@@ -39,18 +39,18 @@ namespace BlokFrames
             }
         }
 
-        protected override byte[] GetCanFrameData()
+        protected override byte[] Encode()
         {
-            if (Error == ErrorKind.NoError) return base.GetCanFrameData();
+            if (Error == ErrorKind.NoError) return base.Encode();
             else return new Byte[] { (byte)(Index | 0x08), (byte)Error, 0, 0, 0 };
         }
 
-        protected override void FillWithCanFrameData(byte[] Data)
+        protected override void Decode(byte[] Data)
         {
             if ((Data[0] >> 7) == 0)
             {
                 Error = ErrorKind.NoError;
-                base.FillWithCanFrameData(Data);
+                base.Decode(Data);
             }
             else
             {

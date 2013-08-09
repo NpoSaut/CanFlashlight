@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Xml.Linq;
 using BlokFramesCodegen.PropertyDescriptions;
+using BlokFramesCodegen.CodeGeneration;
+using System.IO;
 
 namespace BlokFramesCodegen
 {
@@ -13,14 +15,33 @@ namespace BlokFramesCodegen
         {
             var root = XDocument.Load("frames.xml").Root;
 
-            var frame = FrameDescription.GetFrameDescription(root.Elements("Frame").First());
+            var FrameDescriptions = root.Elements("Frame").Select(XFrame => FrameDescription.GetFrameDescription(XFrame));
 
             //var props = frame.Elements("Property").Select(XProperty => PropertyDescription.GetProperty(XProperty)).ToList();
 
             //foreach (var p in props.Where(pp => pp != null))
             //    Console.WriteLine(p.PropertyDecoder.Text);
 
-            Console.WriteLine(frame.GetCode().Text);
+            var Code = new CodeBlock()
+            {
+                new CodeLine("using System;"),
+                new CodeLine("using System.Collections.Generic;"),
+                new CodeLine("using System.Linq;"),
+                new CodeLine("using System.Text;"),
+                new CodeLine(),
+                new CodeHeaderedBlock("namespace BlokFrames")
+                {
+                    FrameDescriptions.Select(fd => fd.GetCode())
+                }
+            };
+
+            using (TextWriter tw = new StreamWriter("Frames.cs"))
+            {
+                tw.WriteLine(Code.Text);
+            }
+
+            Console.WriteLine(Code.Text);
+
             Console.Read();
         }
     }

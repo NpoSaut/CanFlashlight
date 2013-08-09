@@ -22,12 +22,12 @@ namespace BlokFrames
             this.Index = Index;
         }
 
-        protected override byte[] GetCanFrameData()
+        protected override byte[] Encode()
         {
             return new Byte[] { (byte)Index };
         }
 
-        protected override void FillWithCanFrameData(byte[] Data)
+        protected override void Decode(byte[] Data)
         {
             Index = Data[0];
         }

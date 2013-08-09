@@ -40,6 +40,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\BlokFramesCodegen\bin\Debug\Frames.cs">
+      <Link>Frames.cs</Link>
+    </Compile>
     <Compile Include="BlokFrame.cs" />
     <Compile Include="BlokHelper.cs" />
     <Compile Include="DescriptorMismatchException.cs" />

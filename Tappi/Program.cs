@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using Communications.Can;
 using System.Collections.ObjectModel;
+using BlokFrames;
+using System.ComponentModel;
 
 namespace Tappi
 {
@@ -56,6 +58,8 @@ namespace Tappi
         {
             lock (InputLocker)
             {
+                if (f.Descriptor != 0x1888) return;
+
                 if (IsInput) return;
                 var hl = Colors.ContainsKey(f.Descriptor) ? Colors[f.Descriptor] : ConsoleColor.White;
                 Console.Write("{0:HH:mm:ss.fff} ", f.Time);
@@ -68,6 +72,24 @@ namespace Tappi
                 Console.Write(string.Join(" ", f.Data.Select(b => b.ToString("X2"))));
                 Console.WriteLine();
                 Console.ResetColor();
+
+                if (f.Descriptor == 0x1888)
+                {
+                    var F = BlokFrame.GetBlokFrame(f);
+                    var vals = F.GetType().GetProperties().Select(p =>
+                        new
+                        {
+                            p.Name,
+                            da = ((DescriptionAttribute)DescriptionAttribute.GetCustomAttribute(p, typeof(DescriptionAttribute))),
+                            val = p.GetValue(F, null)
+                        })
+                        .Where(v => v.da != null);
+                    foreach (var v in vals)
+                        Console.WriteLine("   {0} = {1}", v.da.Description, v.val);
+                }
+
+
+                Console.WriteLine();
             }
         }
 

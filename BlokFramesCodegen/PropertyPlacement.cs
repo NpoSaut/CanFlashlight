@@ -66,7 +66,7 @@ namespace BlokFramesCodegen
                 boogles.Add(str);
                 position += s.Length;
             }
-            return new CodeLine("UInt64 {0} = {1};", VariableName, string.Join(" | ", boogles));
+            return new CodeLine("int {0} = {1};", VariableName, string.Join(" | ", boogles));
         }
 
         private String ApplyMask(string str, int mask)
@@ -100,8 +100,8 @@ namespace BlokFramesCodegen
 
         private string SetValueString(string recipient, string val, int mask)
         {
-            if (mask == 0xff) return string.Format("{0} = (byte)({1} & 0x{2:x2})", recipient, val, mask);
-            else return string.Format("{0} = (byte)(({0} & ~0x{2:x2}) | ({1} & 0x{2:x2}))", recipient, val, mask);
+            if (mask == 0xff) return string.Format("{0} = (byte)({1} & 0x{2:x2});", recipient, val, mask);
+            else return string.Format("{0} = (byte)(({0} & ~0x{2:x2}) | ({1} & 0x{2:x2}));", recipient, val, mask);
         }
     }
 
