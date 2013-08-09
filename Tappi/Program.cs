@@ -13,6 +13,7 @@ namespace Tappi
         public static List<CanPort> Ports { get; set; }
         public static List<FilterModel> Filters { get; set; }
 
+        private static bool quitRequested = false;
         static void Main(string[] args)
         {
             Console.WriteLine("Welcome to Text APPI");
@@ -33,7 +34,7 @@ namespace Tappi
                 foreach (var p in Ports) RegisterPort(p);
 
                 InitializeKeyBindings();
-                while (true)
+                while (!quitRequested)
                 {
                     ReadInput();
                 }
@@ -53,28 +54,32 @@ namespace Tappi
 
         private static void PrintFrame(CanFrame f)
         {
-            if (IsInput) return;
-            var hl = Colors.ContainsKey(f.Descriptor) ? Colors[f.Descriptor] : ConsoleColor.White;
-            Console.Write("{0:HH:mm:ss.fff} ", f.Time);
-            Console.ForegroundColor = Console.BackgroundColor;
-            Console.BackgroundColor = hl;
-            Console.Write("{0:X4}", f.Descriptor);
-            Console.ResetColor();
-            Console.ForegroundColor = hl;
-            Console.Write(" ");
-            Console.Write(string.Join(" ", f.Data.Select(b => b.ToString("X2"))));
-            Console.WriteLine();
-            Console.ResetColor();
+            lock (InputLocker)
+            {
+                if (IsInput) return;
+                var hl = Colors.ContainsKey(f.Descriptor) ? Colors[f.Descriptor] : ConsoleColor.White;
+                Console.Write("{0:HH:mm:ss.fff} ", f.Time);
+                Console.ForegroundColor = Console.BackgroundColor;
+                Console.BackgroundColor = hl;
+                Console.Write("{0:X4}", f.Descriptor);
+                Console.ResetColor();
+                Console.ForegroundColor = hl;
+                Console.Write(" ");
+                Console.Write(string.Join(" ", f.Data.Select(b => b.ToString("X2"))));
+                Console.WriteLine();
+                Console.ResetColor();
+            }
         }
 
+        private static object InputLocker = new object();
         private static bool IsInput = false;
         private static void ReadInput()
         {
             var k = Console.ReadKey(false);
-            IsInput = true;
+            lock (InputLocker) IsInput = true;
             if (KeyBindings.ContainsKey(k))
                 KeyBindings[k]();
-            IsInput = false;
+            lock (InputLocker) IsInput = false;
         }
 
         private static Dictionary<ConsoleKeyInfo, Action> KeyBindings { get; set; }
@@ -82,7 +87,8 @@ namespace Tappi
         {
             KeyBindings = new Dictionary<ConsoleKeyInfo, Action>()
             {
-                { new ConsoleKeyInfo('\0', ConsoleKey.F2, false, false, false), EditFilters }
+                { new ConsoleKeyInfo('\0', ConsoleKey.F2, false, false, false), EditFilters },
+                { new ConsoleKeyInfo('\0', ConsoleKey.F10, false, false, false), () => quitRequested = true }
             };
         }
 
@@ -92,7 +98,6 @@ namespace Tappi
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Редактирование фильтров:");
             string s = ConsoleEditor.ReadString(string.Join(" ", Filters.Select(f => f.Descriptor.ToString("x4"))));
-            Console.ReadLine();
         }
     }
 }

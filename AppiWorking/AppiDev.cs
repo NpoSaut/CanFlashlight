@@ -246,6 +246,7 @@ namespace Communications.Appi
         {
             int id = (int)BitConverter.ToUInt16(Buff.Take(2).Reverse().ToArray(), 0) >> 4;
             int len = Buff[1] & 0x0f;
+            if (len > 8) throw new AppiBufferDecodeException("Расшифрована неправильная длина CAN-сообщения ({0} байт)", len);
             return CanFrame.NewWithId(id, Buff, 2, len);
         }
     }

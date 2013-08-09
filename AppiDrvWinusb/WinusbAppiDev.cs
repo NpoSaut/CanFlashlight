@@ -72,9 +72,10 @@ namespace Communications.Appi.Winusb
             {
                 Byte[] buff = new Byte[BufferSize];
                 ReadPipe.Read(buff);
-                return buff.SkipWhile(b => b == 0).ToArray();
+                //return buff.SkipWhile(b => b == 0).ToArray();
+                return buff;
             }
-            catch (Exception)
+            catch (USBException)
             {
                 this.OnDisconnected();
                 return new byte[0];
