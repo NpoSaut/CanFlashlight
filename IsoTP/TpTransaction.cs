@@ -28,7 +28,7 @@ namespace Communications.Protocols.IsoTP
         /// Время ожидания пакета
         /// </summary>
         public TimeSpan Timeout { get; set; }
-        public const TimeSpan DefaultTimeout = TimeSpan.FromSeconds(3);
+        public static TimeSpan DefaultTimeout = TimeSpan.FromSeconds(3);
 
         private TpTransactionStatus _Status;
         public event EventHandler StatusChanged;
