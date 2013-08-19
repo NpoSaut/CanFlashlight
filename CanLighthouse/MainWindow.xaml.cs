@@ -61,13 +61,14 @@ namespace CanLighthouse
             //ppp.Start();
         }
 
-        private Dictionary<CanPort, LogRecorder> Recorders = new Dictionary<CanPort,LogRecorder>();
+        private List<LogRecorder> Recorders = new List<LogRecorder>();
 
         private void RegisterNewRecorder(CanPort forPort)
         {
-            Recorders.Add(forPort,
-                            new LogEncodingRecorder<FrameSbsEncoder>(forPort,
-                                new FileInfo(System.IO.Path.Combine("CanLog", string.Format("log {0}.bin", forPort.Name)))));
+            Recorders.Add(new LogEncodingRecorder<FrameSbsEncoder>(forPort,
+                              new FileInfo(System.IO.Path.Combine("CanLog", string.Format("log {0}.bin", forPort.Name)))));
+            Recorders.Add(new LogEncodingRecorder<FrameTextEncoder>(forPort,
+                              new FileInfo(System.IO.Path.Combine("CanLog", string.Format("log {0}.txt", forPort.Name)))));
         }
 
         void Ports_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
@@ -81,7 +82,12 @@ namespace CanLighthouse
             if (e.OldItems != null)
                 foreach (var removedPort in e.OldItems.OfType<CanPort>())
                 {
-                    Recorders[removedPort].Dispose();
+                    foreach (var recorder in Recorders.Where(rec => rec.Port == removedPort).ToList())
+                    {
+                        Recorders.Remove(recorder);
+                        recorder.Dispose();
+                    }
+
                     SniffingWindow.ListeningPorts.Remove(removedPort);
                 }
         }

@@ -40,10 +40,11 @@ namespace CanLighthouse
             t.Start();
         }
 
+        private bool TryReconnect = true;
         void Reconnector()
         {
             int i = 0;
-            while(true)
+            while(TryReconnect)
             {
                 i++;
                 AppiDeviceSlots = new ObservableCollection<AppiDeviceSlot>(
@@ -84,10 +85,12 @@ namespace CanLighthouse
             AppiDevices.Remove(sender as AppiDev);
         }
 
-        private void Application_Exit(object sender, ExitEventArgs e)
+        protected override void OnExit(ExitEventArgs e)
         {
+            TryReconnect = false;
             foreach (var d in AppiDevices)
                 d.Dispose();
+            base.OnExit(e);
         }
     }
 }
