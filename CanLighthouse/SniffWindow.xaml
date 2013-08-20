@@ -1,6 +1,7 @@
 ﻿<Window x:Class="CanLighthouse.SniffWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:CanLighthouse"
         Title="SniffWindow" Height="600" Width="800"
         Name="sw"
         UseLayoutRounding="True" SnapsToDevicePixels="True" Background="{StaticResource {x:Static SystemColors.ControlBrushKey}}" TextOptions.TextFormattingMode="Display" Loaded="sw_Loaded">
@@ -9,24 +10,49 @@
         <SolidColorBrush x:Key="LinesVertical">#1C000060</SolidColorBrush>
     </Window.Resources>
     
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
+    <Window.CommandBindings>
+        <CommandBinding Command="local:Commands.Clear" CanExecute="ClearCommand_CanExecute" Executed="ClearCommand_Executed" />
+        <CommandBinding Command="local:Commands.ToggleAutoScroll" Executed="ToggleAutoScrollCommand_Executed" />
+        <CommandBinding Command="local:Commands.ToggleBeep" Executed="ToggleBeepCommand_Executed" />
+    </Window.CommandBindings>
+    
+    
+    <Window.InputBindings>
+        <KeyBinding Key="F10" Command="local:Commands.Clear" />
+        <KeyBinding Key="F6" Command="local:Commands.ToggleAutoScroll" />
+        <KeyBinding Key="F7" Command="local:Commands.ToggleBeep" />
+    </Window.InputBindings>
+    
+    <DockPanel>
         
-        
-        <Menu Grid.Row="0">
+        <Menu DockPanel.Dock="Top">
             <MenuItem Header="Прослушивание">
                 <MenuItem Header="Устройства.." />
             </MenuItem>
             <MenuItem Header="Вид">
-                <MenuItem Name="AutostrollMenuItem" Header="Автопрокрутка" IsCheckable="True" IsChecked="True" />
-                <MenuItem Name="BeepMenuItem" Header="Пикать при получении" IsCheckable="True" IsChecked="False" />
+                <MenuItem Name="AutostrollMenuItem" Header="Автопрокрутка" IsCheckable="True" IsChecked="True" InputGestureText="F6" />
+                <MenuItem Name="BeepMenuItem" Header="Пикать при получении" IsCheckable="True" IsChecked="False" InputGestureText="F7" />
+                <Separator />
+                <MenuItem Command="local:Commands.Clear" InputGestureText="F10" />
             </MenuItem>
         </Menu>
+        
+        <StatusBar DockPanel.Dock="Bottom">
+            <StatusBarItem>
+                <TextBlock>
+                    <Run>Принято сообщений:</Run>
+                    <Run Text="{Binding ElementName=sw, Path=Frames.Count, Mode=OneWay}" />
+                </TextBlock>
+            </StatusBarItem>
+            <StatusBarItem>
+                <TextBlock>
+                    <Run>Отфильтровано сообщений:</Run>
+                    <Run Text="{Binding ElementName=sw, Path=FramesCV.Count, Mode=OneWay}" />
+                </TextBlock>
+            </StatusBarItem>
+        </StatusBar>
 
-        <Grid Grid.Row="1" Margin="2">
+        <Grid Margin="2">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
@@ -43,7 +69,7 @@
                   HorizontalGridLinesBrush="{StaticResource LinesHorizontal}" VerticalGridLinesBrush="{StaticResource LinesVertical}" Name="LogGrid" LoadingRow="LogGrid_LoadingRow" SelectionChanged="LogGrid_SelectionChanged">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="#" Visibility="Collapsed" />
-                    <DataGridTextColumn Header="Время" Binding="{Binding RecieveTime, StringFormat='HH:mm:ss.ff'}" />
+                    <DataGridTextColumn Header="Время" Binding="{Binding RecieveTime, StringFormat='HH:mm:ss.fff'}" />
                     <DataGridTextColumn Header="Порт" Binding="{Binding PortName}" />
                     <DataGridTextColumn Header="ID" Binding="{Binding Id}" Visibility="Collapsed" />
                     <DataGridTextColumn Header="Дескр" Binding="{Binding Descriptor, StringFormat=X4}" />
@@ -88,7 +114,7 @@
                     <TextBlock Text="Всего кадров:" Style="{StaticResource StatHeader}" />
                     <TextBlock Text="{Binding FramesCount}" Style="{StaticResource StatValue}" />
                     <TextBlock Text="Длительность:" Style="{StaticResource StatHeader}" />
-                    <TextBlock Text="{Binding Duration}" Style="{StaticResource StatValue}" />
+                    <TextBlock Text="{Binding Duration, StringFormat='hh\\:mm\\:ss\\.fff'}" Style="{StaticResource StatValue}" />
                 </StackPanel>
 
                 <DataGrid Grid.Column="1" Margin="2"
@@ -109,7 +135,7 @@
             
         </Grid>
 
-    </Grid>
+    </DockPanel>
     
     
 </Window>

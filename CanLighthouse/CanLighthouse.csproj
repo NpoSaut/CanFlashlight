@@ -58,6 +58,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Commands.cs" />
     <Compile Include="Describing\FrameDescription.cs" />
     <Compile Include="Describing\ProtocolDescription.cs" />
     <Compile Include="Models\FilterModel.cs" />

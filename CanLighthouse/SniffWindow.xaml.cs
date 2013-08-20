@@ -210,5 +210,19 @@ namespace CanLighthouse
         {
             StatisticsGrid.DataContext = new SniffStatisticsModel((sender as DataGrid).SelectedItems.OfType<FrameModel>().ToList());
         }
+
+        // Команда на очистку экрана
+        private void ClearCommand_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        { e.CanExecute = true; }
+        private void ClearCommand_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            Frames.Clear();
+        }
+
+        private void ToggleAutoScrollCommand_Executed(object sender, ExecutedRoutedEventArgs e)
+        { AutostrollMenuItem.IsChecked = !AutostrollMenuItem.IsChecked; }
+
+        private void ToggleBeepCommand_Executed(object sender, ExecutedRoutedEventArgs e)
+        { BeepMenuItem.IsChecked = !BeepMenuItem.IsChecked; }
     }
 }

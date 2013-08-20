@@ -33,6 +33,13 @@ namespace CanLighthouse
             //foreach (var ds in AppiDeviceSlots)
             //    AppiDevices.Add(ds.OpenDevice(true));
 
+            // Виртуальный порт - только для отладки без возможности подключения к CAN-линии
+            #if DEBUG
+            //var virtualPort = new Communications.Can.LogReader.StreamEncoderPort<Communications.Can.FrameEncoders.FrameSbsEncoder>(new System.IO.FileInfo("CanLog\\log Can1.bin"));
+            //Ports.Add(virtualPort);
+            //virtualPort.Start();
+            #endif
+
             Protocol = ProtocolDescription.Load("Default.xpd");
             Protocol.FillupResource(this.Resources);
 

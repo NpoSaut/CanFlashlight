@@ -195,11 +195,4 @@ namespace CanLighthouse
         }
     }
 
-
-
-    public static class Commands
-    {
-        public static readonly RoutedUICommand SendOne = new RoutedUICommand("Отправить один", "SendOne", typeof(MainWindow), new InputGestureCollection(new List<InputGesture>() { new KeyGesture(Key.F3) }));
-        public static readonly RoutedUICommand SendAll = new RoutedUICommand("Отправить все", "SendAll", typeof(MainWindow), new InputGestureCollection(new List<InputGesture>() { new KeyGesture(Key.F4) }));
-    }
 }
