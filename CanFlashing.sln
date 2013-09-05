@@ -23,6 +23,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlokFramesCodegen", "BlokFr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tappi", "Tappi\Tappi.csproj", "{4BC1C6C7-FBBB-4AFD-A53E-046356C5C60F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FirmwarePacking", "FirmwarePacking\FirmwarePacking.csproj", "{ACAFB9B6-F2F8-4B22-8E8A-0C453FBF71B6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleFirmwareUpdater", "ConsoleFirmwareUpdater\ConsoleFirmwareUpdater.csproj", "{4057977B-7F88-42F2-A04E-28F7EE67CD6F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -133,6 +137,26 @@ Global
 		{4BC1C6C7-FBBB-4AFD-A53E-046356C5C60F}.Release|Mixed Platforms.Build.0 = Release|x86
 		{4BC1C6C7-FBBB-4AFD-A53E-046356C5C60F}.Release|x86.ActiveCfg = Release|x86
 		{4BC1C6C7-FBBB-4AFD-A53E-046356C5C60F}.Release|x86.Build.0 = Release|x86
+		{ACAFB9B6-F2F8-4B22-8E8A-0C453FBF71B6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ACAFB9B6-F2F8-4B22-8E8A-0C453FBF71B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ACAFB9B6-F2F8-4B22-8E8A-0C453FBF71B6}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{ACAFB9B6-F2F8-4B22-8E8A-0C453FBF71B6}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{ACAFB9B6-F2F8-4B22-8E8A-0C453FBF71B6}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{ACAFB9B6-F2F8-4B22-8E8A-0C453FBF71B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ACAFB9B6-F2F8-4B22-8E8A-0C453FBF71B6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ACAFB9B6-F2F8-4B22-8E8A-0C453FBF71B6}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{ACAFB9B6-F2F8-4B22-8E8A-0C453FBF71B6}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{ACAFB9B6-F2F8-4B22-8E8A-0C453FBF71B6}.Release|x86.ActiveCfg = Release|Any CPU
+		{4057977B-7F88-42F2-A04E-28F7EE67CD6F}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{4057977B-7F88-42F2-A04E-28F7EE67CD6F}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
+		{4057977B-7F88-42F2-A04E-28F7EE67CD6F}.Debug|Mixed Platforms.Build.0 = Debug|x86
+		{4057977B-7F88-42F2-A04E-28F7EE67CD6F}.Debug|x86.ActiveCfg = Debug|x86
+		{4057977B-7F88-42F2-A04E-28F7EE67CD6F}.Debug|x86.Build.0 = Debug|x86
+		{4057977B-7F88-42F2-A04E-28F7EE67CD6F}.Release|Any CPU.ActiveCfg = Release|x86
+		{4057977B-7F88-42F2-A04E-28F7EE67CD6F}.Release|Mixed Platforms.ActiveCfg = Release|x86
+		{4057977B-7F88-42F2-A04E-28F7EE67CD6F}.Release|Mixed Platforms.Build.0 = Release|x86
+		{4057977B-7F88-42F2-A04E-28F7EE67CD6F}.Release|x86.ActiveCfg = Release|x86
+		{4057977B-7F88-42F2-A04E-28F7EE67CD6F}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -140,5 +164,6 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{A28AE116-EC09-4C57-958B-4EFB8B69501A} = {2568981D-B275-4E1D-85BF-0CB9D78207DB}
 		{3D1978E9-0A08-43F2-956C-B7358275319A} = {2568981D-B275-4E1D-85BF-0CB9D78207DB}
+		{4057977B-7F88-42F2-A04E-28F7EE67CD6F} = {2568981D-B275-4E1D-85BF-0CB9D78207DB}
 	EndGlobalSection
 EndGlobal
