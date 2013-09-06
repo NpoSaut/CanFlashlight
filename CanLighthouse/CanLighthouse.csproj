@@ -146,6 +146,18 @@
       <Project>{5BD64D61-F283-4833-B5A0-25EBE435AC89}</Project>
       <Name>CanLine</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Can\AppiDrvWinusb\AppiDrvWinusb.csproj">
+      <Project>{758C61BC-7BE1-4E25-BE05-3A17619199EE}</Project>
+      <Name>AppiDrvWinusb %28Can\AppiDrvWinusb%29</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Can\AppiWorking\AppiWorking.csproj">
+      <Project>{5A812723-E98B-4B82-AE7B-8E2747D8541F}</Project>
+      <Name>AppiWorking %28Can\AppiWorking%29</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Can\CanLine\CanLine.csproj">
+      <Project>{6C5B1ECA-5187-4F63-8CF1-C17DF50D0F65}</Project>
+      <Name>CanLine %28Can\CanLine%29</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Resource Include="pirat.ico" />
