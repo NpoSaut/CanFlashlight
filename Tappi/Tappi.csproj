@@ -49,20 +49,20 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\AppiDrvWinusb\AppiDrvWinusb.csproj">
-      <Project>{82EB0C22-FADE-497A-BE09-FFA3624D4E63}</Project>
+    <ProjectReference Include="..\Can\AppiDrvWinusb\AppiDrvWinusb.csproj">
+      <Project>{758C61BC-7BE1-4E25-BE05-3A17619199EE}</Project>
       <Name>AppiDrvWinusb</Name>
     </ProjectReference>
-    <ProjectReference Include="..\AppiWorking\AppiWorking.csproj">
-      <Project>{F0B79856-02E6-41EC-8F95-4AA17604BA11}</Project>
+    <ProjectReference Include="..\Can\AppiWorking\AppiWorking.csproj">
+      <Project>{5A812723-E98B-4B82-AE7B-8E2747D8541F}</Project>
       <Name>AppiWorking</Name>
     </ProjectReference>
-    <ProjectReference Include="..\BlokFrames\BlokFrames.csproj">
+    <ProjectReference Include="..\Can\BlokFrames\BlokFrames.csproj">
       <Project>{405B0F26-46EE-4D8C-9267-652F7D4C4AB0}</Project>
       <Name>BlokFrames</Name>
     </ProjectReference>
-    <ProjectReference Include="..\CanLine\CanLine.csproj">
-      <Project>{5BD64D61-F283-4833-B5A0-25EBE435AC89}</Project>
+    <ProjectReference Include="..\Can\CanLine\CanLine.csproj">
+      <Project>{6C5B1ECA-5187-4F63-8CF1-C17DF50D0F65}</Project>
       <Name>CanLine</Name>
     </ProjectReference>
   </ItemGroup>
