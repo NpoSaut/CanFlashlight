@@ -63,21 +63,19 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
-            <DataGrid Grid.Row="1" Grid.Column="0" Margin="2"
-                  ItemsSource="{Binding ElementName=sw, Path=FramesCV}"
-                  AutoGenerateColumns="False" IsReadOnly="True"
-                  HorizontalGridLinesBrush="{StaticResource LinesHorizontal}" VerticalGridLinesBrush="{StaticResource LinesVertical}" Name="LogGrid" LoadingRow="LogGrid_LoadingRow" SelectionChanged="LogGrid_SelectionChanged">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="#" Visibility="Collapsed" />
-                    <DataGridTextColumn Header="Время" Binding="{Binding RecieveTime, StringFormat='HH:mm:ss.fff'}" />
-                    <DataGridTextColumn Header="Порт" Binding="{Binding PortName}" />
-                    <DataGridTextColumn Header="ID" Binding="{Binding Id}" Visibility="Collapsed" />
-                    <DataGridTextColumn Header="Дескр" Binding="{Binding Descriptor, StringFormat=X4}" />
-                    <DataGridTextColumn Header="Данные" Binding="{Binding HexString}" />
-                    <DataGridTextColumn Header="Двоичные" Binding="{Binding BinaryString}" />
-                    <DataGridTextColumn Header="Название" Binding="{Binding FrameName}" />
-                </DataGrid.Columns>
-            </DataGrid>
+            <ListView Grid.Row="1" Grid.Column="0" Margin="2"
+                      ItemsSource="{Binding ElementName=sw, Path=FramesCV}"
+                      SelectionChanged="LogGrid_SelectionChanged" Name="LogGrid">
+                <ListView.View>
+                    <GridView>
+                        <GridViewColumn Header="Время" DisplayMemberBinding="{Binding RecieveTime, StringFormat='HH:mm:ss.fff'}" />
+                        <GridViewColumn Header="Порт" DisplayMemberBinding="{Binding PortName}" />
+                        <GridViewColumn Header="Дескр" DisplayMemberBinding="{Binding Descriptor, StringFormat=X4}" />
+                        <GridViewColumn Header="Данные" DisplayMemberBinding="{Binding HexString}" />
+                        <GridViewColumn Header="Двоичные" DisplayMemberBinding="{Binding BinaryString}" />
+                    </GridView>
+                </ListView.View>
+            </ListView>
 
             <Grid Grid.Row="1" Grid.Column="1" Width="150">
                 <Grid.RowDefinitions>

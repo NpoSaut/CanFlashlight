@@ -212,7 +212,7 @@ namespace CanLighthouse
 
         private void LogGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            StatisticsGrid.DataContext = new SniffStatisticsModel((sender as DataGrid).SelectedItems.OfType<FrameModel>().ToList());
+            StatisticsGrid.DataContext = new SniffStatisticsModel((sender as ListView).SelectedItems.OfType<FrameModel>().ToList());
         }
 
         // Команда на очистку экрана

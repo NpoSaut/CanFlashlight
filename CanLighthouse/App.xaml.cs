@@ -65,6 +65,9 @@ namespace CanLighthouse
                         var dev = d.OpenDevice(true);
                         AppiDevices.Add(dev);
                     } catch { }
+
+                //if (!System.Threading.Thread.Yield())
+                System.Threading.Thread.Sleep(500);
             }
         }
 
