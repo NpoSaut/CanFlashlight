@@ -1,3 +1,6 @@
 [submodule "Can"]
 	path = Can
 	url = https://github.com/NpoSaut/netCanLib.git
+[submodule "ObjectiveCommons"]
+	path = ObjectiveCommons
+	url = https://github.com/NpoSaut/ObjectiveCommons.git

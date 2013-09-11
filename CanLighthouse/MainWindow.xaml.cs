@@ -34,7 +34,7 @@ namespace CanLighthouse
 
         public ObservableCollection<CanPort> Ports
         {
-            get { return (App.Current as App).Ports; }
+            get { return App.CurrentApp.Ports; }
         }
 
         public SniffWindow SniffingWindow { get; private set; }
@@ -43,8 +43,14 @@ namespace CanLighthouse
         {
             Directory.CreateDirectory("CanLog");
 
-            //var ppp = new StreamEncoderPort<FrameSbsEncoder>(new FileInfo("data"));
-            //Ports.Add(ppp);
+#if VCAN
+            if (File.Exists("emulate_can.bin"))
+            {
+                var ppp = new StreamEncoderPort<FrameSbsEncoder>(new FileInfo("emulate_can.bin"));
+                Ports.Add(ppp);
+                ppp.Start(1);
+            }
+#endif
 
             if (Ports.Any()) (new SendWindow(Ports.First()) { Owner = this }).Show();
             (SniffingWindow = (new SniffWindow(Ports) { Owner = this } )).Show();

@@ -8,6 +8,7 @@ using Communications.Appi;
 using System.Collections.ObjectModel;
 using Communications.Can;
 using CanLighthouse.Describing;
+using Communications.Can.LogReader;
 
 namespace CanLighthouse
 {
@@ -19,6 +20,8 @@ namespace CanLighthouse
         public ObservableCollection<AppiDev> AppiDevices { get; set; }
         private ObservableCollection<AppiDeviceSlot> AppiDeviceSlots { get; set; }
         public ObservableCollection<CanPort> Ports { get; private set; }
+
+        public static App CurrentApp { get { return App.Current as App; } }
 
         public ProtocolDescription Protocol { get; set; }
 
@@ -97,6 +100,8 @@ namespace CanLighthouse
             TryReconnect = false;
             foreach (var d in AppiDevices)
                 d.Dispose();
+            foreach (var p in Ports.OfType<CanVirtualPort>())
+                p.Dispose();
             base.OnExit(e);
         }
     }

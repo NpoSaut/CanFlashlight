@@ -27,8 +27,8 @@ namespace CanLighthouse
     /// </summary>
     public partial class SniffWindow : Window
     {
-        private const int CutOffCount = 10000;
-        public ObservableCollection<FrameModel> Frames { get; private set; }
+        private const int CutOffCount = 30000;
+        public ObjectiveCommons.Collections.LockableObservableCollection<FrameModel> Frames { get; private set; }
         public ListCollectionView FramesCV { get; set; }
         public List<UInt16> Filters { get; private set; }
 
@@ -43,7 +43,7 @@ namespace CanLighthouse
             // Необъяснимый костыль для поправки локализации строковых конвертеров
             Language = System.Windows.Markup.XmlLanguage.GetLanguage(System.Globalization.CultureInfo.CurrentCulture.IetfLanguageTag);
 
-            Frames = new ObservableCollection<FrameModel>();
+            Frames = new ObjectiveCommons.Collections.LockableObservableCollection<FrameModel>();
             FramesCV = new ListCollectionView(Frames);
             Frames.CollectionChanged += new System.Collections.Specialized.NotifyCollectionChangedEventHandler(Frames_CollectionChanged);
 
@@ -112,8 +112,12 @@ namespace CanLighthouse
         private ConcurrentQueue<FrameModel> FramesToInterfaceBuffer = new ConcurrentQueue<FrameModel>();
         private void SyncronizeFramesOutput()
         {
-            for (int i = 0; i < Frames.Count + FramesToInterfaceBuffer.Count - CutOffCount; i++)
-                Frames.RemoveAt(0);
+            if (Frames.Count + FramesToInterfaceBuffer.Count > CutOffCount)
+                using (Frames.Locker())
+                {
+                    for (int i = 0; i < CutOffCount * 0.3; i++)
+                        Frames.RemoveAt(0);
+                }
 
             FrameModel f;
             bool beep = false;

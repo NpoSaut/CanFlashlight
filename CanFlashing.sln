@@ -15,6 +15,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppiDrvWinusb", "Can\AppiDr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlokFrames", "Can\BlokFrames\BlokFrames.csproj", "{405B0F26-46EE-4D8C-9267-652F7D4C4AB0}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Misc", "Misc", "{5C686D97-1526-469D-8FAF-274B79F564C9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ObjectiveCommons", "ObjectiveCommons\ObjectiveCommons.csproj", "{CFA6774B-A4E1-4E01-9606-F0E6DDC33901}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -85,6 +89,16 @@ Global
 		{405B0F26-46EE-4D8C-9267-652F7D4C4AB0}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{405B0F26-46EE-4D8C-9267-652F7D4C4AB0}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{405B0F26-46EE-4D8C-9267-652F7D4C4AB0}.Release|x86.ActiveCfg = Release|Any CPU
+		{CFA6774B-A4E1-4E01-9606-F0E6DDC33901}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CFA6774B-A4E1-4E01-9606-F0E6DDC33901}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CFA6774B-A4E1-4E01-9606-F0E6DDC33901}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{CFA6774B-A4E1-4E01-9606-F0E6DDC33901}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{CFA6774B-A4E1-4E01-9606-F0E6DDC33901}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{CFA6774B-A4E1-4E01-9606-F0E6DDC33901}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CFA6774B-A4E1-4E01-9606-F0E6DDC33901}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CFA6774B-A4E1-4E01-9606-F0E6DDC33901}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{CFA6774B-A4E1-4E01-9606-F0E6DDC33901}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{CFA6774B-A4E1-4E01-9606-F0E6DDC33901}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -94,5 +108,6 @@ Global
 		{5A812723-E98B-4B82-AE7B-8E2747D8541F} = {BDC7DCEE-F0EF-47B3-96B0-2454BCDCA3A5}
 		{758C61BC-7BE1-4E25-BE05-3A17619199EE} = {BDC7DCEE-F0EF-47B3-96B0-2454BCDCA3A5}
 		{405B0F26-46EE-4D8C-9267-652F7D4C4AB0} = {BDC7DCEE-F0EF-47B3-96B0-2454BCDCA3A5}
+		{CFA6774B-A4E1-4E01-9606-F0E6DDC33901} = {5C686D97-1526-469D-8FAF-274B79F564C9}
 	EndGlobalSection
 EndGlobal

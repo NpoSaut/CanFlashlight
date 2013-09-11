@@ -22,7 +22,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -136,15 +136,19 @@
   <ItemGroup>
     <ProjectReference Include="..\Can\AppiDrvWinusb\AppiDrvWinusb.csproj">
       <Project>{758C61BC-7BE1-4E25-BE05-3A17619199EE}</Project>
-      <Name>AppiDrvWinusb %28Can\AppiDrvWinusb%29</Name>
+      <Name>AppiDrvWinusb</Name>
     </ProjectReference>
     <ProjectReference Include="..\Can\AppiWorking\AppiWorking.csproj">
       <Project>{5A812723-E98B-4B82-AE7B-8E2747D8541F}</Project>
-      <Name>AppiWorking %28Can\AppiWorking%29</Name>
+      <Name>AppiWorking</Name>
     </ProjectReference>
     <ProjectReference Include="..\Can\CanLine\CanLine.csproj">
       <Project>{6C5B1ECA-5187-4F63-8CF1-C17DF50D0F65}</Project>
       <Name>CanLine</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ObjectiveCommons\ObjectiveCommons.csproj">
+      <Project>{CFA6774B-A4E1-4E01-9606-F0E6DDC33901}</Project>
+      <Name>ObjectiveCommons</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
