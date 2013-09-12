@@ -63,7 +63,7 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
-            <ListView Grid.Row="1" Grid.Column="0" Margin="2"
+            <!--<ListView Grid.Row="1" Grid.Column="0" Margin="2"
                       ItemsSource="{Binding ElementName=sw, Path=FramesCV}"
                       SelectionChanged="LogGrid_SelectionChanged" Name="LogGrid" FontFamily="Lucida Console">
                 <ListView.View>
@@ -72,10 +72,12 @@
                         <GridViewColumn Header="Порт"   DisplayMemberBinding="{Binding PortName}" />
                         <GridViewColumn Header="Дескр"  DisplayMemberBinding="{Binding Descriptor, StringFormat=X4}" />
                         <GridViewColumn Header="Данные" DisplayMemberBinding="{Binding HexString}" />
-                        <!--<GridViewColumn Header="Двоичные" DisplayMemberBinding="{Binding BinaryString}" />-->
                     </GridView>
                 </ListView.View>
-            </ListView>
+            </ListView>-->
+            <ListBox Grid.Row="1" Grid.Column="0" Margin="2"
+                      ItemsSource="{Binding ElementName=sw, Path=FramesCV}"
+                      SelectionChanged="LogGrid_SelectionChanged" Name="LogGrid" FontFamily="Lucida Console" />
 
             <Grid Grid.Row="1" Grid.Column="1" Width="150">
                 <Grid.RowDefinitions>

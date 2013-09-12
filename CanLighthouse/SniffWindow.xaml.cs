@@ -100,6 +100,10 @@ namespace CanLighthouse
         void CanFrames_Recieved(object sender, Communications.Can.CanFramesReceiveEventArgs e)
         {
             var FrameModels = e.Frames.Select(f => new FrameModel(f) { PortName = (sender as CanPort).Name }).ToList();
+
+            if (FrameModels.Any(f => FrameFilter(f)))
+                Beeper.Beep();
+
             foreach (var f in FrameModels)
                 FramesToInterfaceBuffer.Enqueue(f);
 
@@ -128,26 +132,18 @@ namespace CanLighthouse
                 else Buffer.Dequeue();
             }
 
-            bool beep = false;
-            bool checkbeep = BeepMenuItem.IsChecked;
-
             using (Frames.Locker())
             {
                 foreach (var f in Buffer)
                 {
                     Frames.Add(f);
-                    if (checkbeep && !beep && FrameFilter(f))
-                        beep = true;
                 }
             }
-
-            if (beep)
-                BeginBeep();
 
             if (AutostrollMenuItem.IsChecked && !LogGrid.Items.IsEmpty)
                 ScrollToLastItem();
 
-            System.Threading.Thread.Sleep(30);
+            System.Threading.Thread.Sleep(0);
             FramesSyncronizationScheduled = false;
 
         }
@@ -156,10 +152,6 @@ namespace CanLighthouse
             var LastVisibleFrame = FramesCV.OfType<FrameModel>().LastOrDefault();
             if (LastVisibleFrame != null)
                 LogGrid.ScrollIntoView(LastVisibleFrame);
-        }
-        private void BeginBeep()
-        {
-            System.Threading.Tasks.Task.Factory.StartNew(() => Console.Beep(1000, 50));
         }
 
         private void FiltersEdit_TextChanged(object sender, TextChangedEventArgs e)
@@ -234,7 +226,7 @@ namespace CanLighthouse
 
         private void LogGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            StatisticsGrid.DataContext = new SniffStatisticsModel((sender as ListView).SelectedItems.OfType<FrameModel>().ToList());
+            StatisticsGrid.DataContext = new SniffStatisticsModel((sender as ListBox).SelectedItems.OfType<FrameModel>().ToList());
         }
 
         // Команда на очистку экрана
