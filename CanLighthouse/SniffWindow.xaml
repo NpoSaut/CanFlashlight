@@ -30,8 +30,8 @@
                 <MenuItem Header="Устройства.." />
             </MenuItem>
             <MenuItem Header="Вид">
-                <MenuItem Name="AutostrollMenuItem" Header="Автопрокрутка" IsCheckable="True" IsChecked="True" InputGestureText="F6" />
-                <MenuItem Name="BeepMenuItem" Header="Пикать при получении" IsCheckable="True" IsChecked="False" InputGestureText="F7" />
+                <MenuItem Name="AutostrollMenuItem" Header="Автопрокрутка" IsCheckable="True" InputGestureText="F6" IsChecked="{Binding ElementName=sw, Path=Autoscroll}" />
+                <MenuItem Name="BeepMenuItem" Header="Пикать при получении" IsCheckable="True" InputGestureText="F7"  IsChecked="{Binding ElementName=sw, Path=BeepOnFrame}" />
                 <Separator />
                 <MenuItem Command="local:Commands.Clear" InputGestureText="F10" />
             </MenuItem>
@@ -41,13 +41,13 @@
             <StatusBarItem>
                 <TextBlock>
                     <Run>Принято сообщений:</Run>
-                    <Run Text="{Binding ElementName=sw, Path=Frames.Count, Mode=OneWay}" />
+                    <Run Text="{Binding ElementName=sw, Path=Frames.TotalFrames, Mode=OneWay}" />
                 </TextBlock>
             </StatusBarItem>
             <StatusBarItem>
                 <TextBlock>
                     <Run>Отфильтровано сообщений:</Run>
-                    <Run Text="{Binding ElementName=sw, Path=FramesCV.Count, Mode=OneWay}" />
+                    <Run Text="{Binding ElementName=sw, Path=Frames.FilteredFrames.Count, Mode=OneWay}" />
                 </TextBlock>
             </StatusBarItem>
         </StatusBar>
@@ -76,7 +76,7 @@
                 </ListView.View>
             </ListView>-->
             <ListBox Grid.Row="1" Grid.Column="0" Margin="2"
-                      ItemsSource="{Binding ElementName=sw, Path=FramesCV}"
+                      ItemsSource="{Binding ElementName=sw, Path=Frames.FilteredFrames}"
                       SelectionChanged="LogGrid_SelectionChanged" Name="LogGrid" FontFamily="Lucida Console" SelectionMode="Extended">
                 <ListBox.ItemContainerStyle>
                     <Style TargetType="ListBoxItem">

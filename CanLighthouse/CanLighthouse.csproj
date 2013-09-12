@@ -62,6 +62,7 @@
     <Compile Include="Commands.cs" />
     <Compile Include="Describing\FrameDescription.cs" />
     <Compile Include="Describing\ProtocolDescription.cs" />
+    <Compile Include="FramesProcessor.cs" />
     <Compile Include="Models\FilterModel.cs" />
     <Compile Include="Models\FrameHandlerModel.cs" />
     <Compile Include="Models\FrameModel.cs" />

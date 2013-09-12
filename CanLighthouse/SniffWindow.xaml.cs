@@ -20,22 +20,54 @@ using System.Collections.Specialized;
 using System.Collections.Concurrent;
 using CanLighthouse.Describing;
 using System.Threading.Tasks;
+using System.ComponentModel;
 
 namespace CanLighthouse
 {
     /// <summary>
     /// Логика взаимодействия для SniffWindow.xaml
     /// </summary>
-    public partial class SniffWindow : Window
+    public partial class SniffWindow : Window, INotifyPropertyChanged
     {
-        private const int CutOffCount = 30000;
-        public ObjectiveCommons.Collections.LockableObservableCollection<FrameModel> Frames { get; private set; }
-        public ListCollectionView FramesCV { get; set; }
-        public HashSet<UInt16> Filters { get; private set; }
+        public event PropertyChangedEventHandler PropertyChanged;
+        public void OnPropertyChanged(String PropertyName)
+        {
+            if (PropertyChanged != null) PropertyChanged(this, new PropertyChangedEventArgs(PropertyName));
+        }
 
         public List<Brush> HighlightBrushes { get; private set; }
-
         private ResourceDictionary ColorsDic = new ResourceDictionary();
+
+        public FramesProcessor Frames { get; set; }
+
+        private bool _Autoscroll = true;
+        public bool Autoscroll
+        {
+            get { return _Autoscroll; }
+            set
+            {
+                if (_Autoscroll != value)
+                {
+                    _Autoscroll = value;
+                    OnPropertyChanged("Autoscroll");
+                }
+            }
+        }
+
+        private bool _BeepOnFrames = false;
+        public bool BeepOnFrames
+        {
+            get { return _BeepOnFrames; }
+            set
+            {
+                if (_BeepOnFrames != value)
+                {
+                    _BeepOnFrames = value;
+                    Frames.BeepWhenFrameReceived = value;
+                    OnPropertyChanged("BeepOnFrames");
+                }
+            }
+        }
 
         public ObservableCollection<CanPort> ListeningPorts { get; private set; }
 
@@ -43,12 +75,6 @@ namespace CanLighthouse
         {
             // Необъяснимый костыль для поправки локализации строковых конвертеров
             Language = System.Windows.Markup.XmlLanguage.GetLanguage(System.Globalization.CultureInfo.CurrentCulture.IetfLanguageTag);
-
-            Frames = new ObjectiveCommons.Collections.LockableObservableCollection<FrameModel>();
-            FramesCV = new ListCollectionView(Frames);
-            Frames.CollectionChanged += new System.Collections.Specialized.NotifyCollectionChangedEventHandler(Frames_CollectionChanged);
-
-            Filters = new HashSet<ushort>();
 
             HighlightBrushes = new List<Brush>()
                             {
@@ -58,6 +84,9 @@ namespace CanLighthouse
                                 Brushes.Blue, Brushes.Violet, Brushes.BlueViolet, Brushes.CadetBlue
                             };
 
+            Frames = new FramesProcessor();
+            Frames.NewItemAdEnd += new EventHandler<FramesProcessor.NewItemAdEndEventArgs>(Frames_NewItemAdEnd);
+
             InitializeComponent();
 
             ListeningPorts = new ObservableCollection<CanPort>();
@@ -66,6 +95,12 @@ namespace CanLighthouse
 
 
             Dispatcher.BeginInvoke((Action<String>)(txt => FiltersEdit.Text = txt), Properties.Settings.Default.LastFilters);
+        }
+
+        void Frames_NewItemAdEnd(object sender, FramesProcessor.NewItemAdEndEventArgs e)
+        {
+            if (Autoscroll)
+                LogGrid.ScrollIntoView(e.LastItem);
         }
 
         void ListeningPorts_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
@@ -81,74 +116,10 @@ namespace CanLighthouse
             this.Title = String.Format("Прослушивание {0}", string.Join(", ", ListeningPorts.Select(p => p.Name)));
         }
 
-        void Frames_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
-        {
-            //if (e.NewItems != null)
-            //    LogGrid.ScrollIntoView(e.NewItems[e.NewItems.Count - 1]);
-        }
-
-        private bool FrameFilter(object fo)
-        {
-            if (!Filters.Any()) return true;
-            else
-            {
-                var fr = fo as FrameModel;
-                return Filters.Contains(fr.Descriptor);
-            }
-        }
-
         void CanFrames_Recieved(object sender, Communications.Can.CanFramesReceiveEventArgs e)
         {
             var FrameModels = e.Frames.Select(f => new FrameModel(f) { PortName = (sender as CanPort).Name }).ToList();
-
-            if (FrameModels.Any(f => FrameFilter(f)))
-                Beeper.Beep();
-
-            foreach (var f in FrameModels)
-                FramesToInterfaceBuffer.Enqueue(f);
-
-            if (!FramesSyncronizationScheduled)
-            {
-                FramesSyncronizationScheduled = true;
-
-                var xxx = FramesToInterfaceBuffer;
-                FramesToInterfaceBuffer = new Queue<FrameModel>();
-                Action UpdateAction =
-                    () =>
-                        Dispatcher.BeginInvoke((Action<Queue<FrameModel>>)SyncronizeFramesOutput,
-                            System.Windows.Threading.DispatcherPriority.Background,
-                            xxx);
-                Task.Factory.StartNew(UpdateAction);
-            }
-        }
-        private bool FramesSyncronizationScheduled = false;
-        private Queue<FrameModel> FramesToInterfaceBuffer = new Queue<FrameModel>();
-        private void SyncronizeFramesOutput(Queue<FrameModel> Buffer)
-        {
-            int itemsToDelete = Frames.Count + Buffer.Count - CutOffCount;
-            for (int i = 0; i < itemsToDelete; i++)
-            {
-                if (Frames.Count > 0) Frames.RemoveAt(0);
-                else Buffer.Dequeue();
-            }
-
-            foreach (var f in Buffer)
-            {
-                Frames.Add(f);
-            }
-
-            if (AutostrollMenuItem.IsChecked && !LogGrid.Items.IsEmpty)
-                ScrollToLastItem();
-
-            System.Threading.Thread.Sleep(100);
-            FramesSyncronizationScheduled = false;
-
-        }
-        private void ScrollToLastItem()
-        {
-            var LastVisibleFrame = FramesCV.OfType<FrameModel>().LastOrDefault();
-            if (LastVisibleFrame != null)
-                LogGrid.ScrollIntoView(LastVisibleFrame);
+            Frames.PushFrames(FrameModels);
         }
 
         private void FiltersEdit_TextChanged(object sender, TextChangedEventArgs e)
@@ -164,11 +135,9 @@ namespace CanLighthouse
                     NewFilters.Add(descr);
             }
 
-            if (!Filters.SequenceEqual(NewFilters))
+            if (!Frames.Filters.SequenceEqual(NewFilters))
             {
-                Filters = new HashSet<ushort>(NewFilters);
-                if (Filters.Any()) FramesCV.Filter = FrameFilter;
-                else FramesCV.Filter = null;
+                Frames.Filters = new HashSet<ushort>(NewFilters);
             }
 
             Properties.Settings.Default.LastFilters = (sender as TextBox).Text;
@@ -235,10 +204,10 @@ namespace CanLighthouse
         }
 
         private void ToggleAutoScrollCommand_Executed(object sender, ExecutedRoutedEventArgs e)
-        { AutostrollMenuItem.IsChecked = !AutostrollMenuItem.IsChecked; }
+        { Autoscroll = !Autoscroll; }
 
         private void ToggleBeepCommand_Executed(object sender, ExecutedRoutedEventArgs e)
-        { BeepMenuItem.IsChecked = !BeepMenuItem.IsChecked; }
+        { BeepOnFrames = !BeepOnFrames; }
 
         private void LogItem_Loaded(object sender, RoutedEventArgs e)
         {

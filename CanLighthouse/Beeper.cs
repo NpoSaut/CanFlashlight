@@ -44,25 +44,21 @@ namespace CanLighthouse
                 BeepInfo beep;
                 if (BeepsQueue.TryDequeue(out beep))
                 {
-                    Console.WriteLine("dq");
                     if ((DateTime.Now - beep.OrderTime).TotalMilliseconds < beep.Duration + 50)
                     {
-                        Console.WriteLine(beep);
                         Console.Beep(beep.Frequency, beep.Duration);
                         Thread.Sleep(50);
                     }
                 }
-                Thread.Yield();
+                Thread.Sleep(5);
             }
         }
 
         public static void Beep() { Beep(new BeepInfo()); }
         public static void Beep(BeepInfo beep)
         {
-            Console.WriteLine("e");
             if (LastBeep == null || (beep.OrderTime - LastBeep.OrderTime).TotalMilliseconds > LastBeep.Duration)
             {
-                Console.WriteLine("enq");
                 BeepsQueue.Enqueue(beep);
                 LastBeep = beep;
             }
