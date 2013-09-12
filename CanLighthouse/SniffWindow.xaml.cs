@@ -28,7 +28,7 @@ namespace CanLighthouse
     /// </summary>
     public partial class SniffWindow : Window
     {
-        private const int CutOffCount = 3000;
+        private const int CutOffCount = 30000;
         public ObjectiveCommons.Collections.LockableObservableCollection<FrameModel> Frames { get; private set; }
         public ListCollectionView FramesCV { get; set; }
         public HashSet<UInt16> Filters { get; private set; }
@@ -132,18 +132,15 @@ namespace CanLighthouse
                 else Buffer.Dequeue();
             }
 
-            using (Frames.Locker())
+            foreach (var f in Buffer)
             {
-                foreach (var f in Buffer)
-                {
-                    Frames.Add(f);
-                }
+                Frames.Add(f);
             }
 
             if (AutostrollMenuItem.IsChecked && !LogGrid.Items.IsEmpty)
                 ScrollToLastItem();
 
-            System.Threading.Thread.Sleep(0);
+            System.Threading.Thread.Sleep(100);
             FramesSyncronizationScheduled = false;
 
         }
@@ -242,5 +239,12 @@ namespace CanLighthouse
 
         private void ToggleBeepCommand_Executed(object sender, ExecutedRoutedEventArgs e)
         { BeepMenuItem.IsChecked = !BeepMenuItem.IsChecked; }
+
+        private void LogItem_Loaded(object sender, RoutedEventArgs e)
+        {
+            var s = sender as ListBoxItem;
+            var f = s.DataContext as FrameModel;
+            s.SetResourceReference(Control.ForegroundProperty, ProtocolDescription.GetBrushResourceNameForDescriptor(f.Descriptor));
+        }
     }
 }
