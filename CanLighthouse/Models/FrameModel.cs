@@ -199,7 +199,7 @@ namespace CanLighthouse.Models
 
         public override string ToString()
         {
-            return string.Format("{0:HH:mm:ss.fff}\t{1:X4}\t{2}", RecieveTime, Descriptor, HexString);
+            return string.Format("{0:HH:mm:ss.fff}  \t{1:X4}  \t{2}", RecieveTime, Descriptor, HexString);
         }
     }
 }

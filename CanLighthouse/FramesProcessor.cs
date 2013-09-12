@@ -139,6 +139,7 @@ namespace CanLighthouse
                         AllFrames.ToList();
                     foreach (var f in yo)
                         FilteredFrames.Add(f);
+                    FramesToInterfaceBuffer = new Queue<FrameModel>(FramesToInterfaceBuffer.Where(FrameFilter));
                 }
         }
 
