@@ -181,9 +181,9 @@ namespace CanLighthouse.Models
             this.BasedOn = OnFrame;
             Descriptor = (UInt16)OnFrame.Descriptor;
             Id = (UInt16)OnFrame.Id;
-            RecieveTime = DateTime.Now;
+            RecieveTime = OnFrame.Time;
             Data = OnFrame.Data.ToArray();
-            FindDescription();
+            //FindDescription();
         }
         public void FindDescription()
         {
@@ -195,6 +195,11 @@ namespace CanLighthouse.Models
         public CanFrame GetFrame()
         {
             return CanFrame.NewWithId(this.Id, this.Data.ToArray());
+        }
+
+        public override string ToString()
+        {
+            return string.Format("{0} {1:X4} {2}", RecieveTime.ToShortTimeString(), Descriptor, HexString);
         }
     }
 }

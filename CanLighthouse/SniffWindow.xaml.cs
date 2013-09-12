@@ -19,6 +19,7 @@ using System.Xml.Linq;
 using System.Collections.Specialized;
 using System.Collections.Concurrent;
 using CanLighthouse.Describing;
+using System.Threading.Tasks;
 
 namespace CanLighthouse
 {
@@ -30,7 +31,7 @@ namespace CanLighthouse
         private const int CutOffCount = 30000;
         public ObjectiveCommons.Collections.LockableObservableCollection<FrameModel> Frames { get; private set; }
         public ListCollectionView FramesCV { get; set; }
-        public List<UInt16> Filters { get; private set; }
+        public HashSet<UInt16> Filters { get; private set; }
 
         public List<Brush> HighlightBrushes { get; private set; }
 
@@ -47,7 +48,7 @@ namespace CanLighthouse
             FramesCV = new ListCollectionView(Frames);
             Frames.CollectionChanged += new System.Collections.Specialized.NotifyCollectionChangedEventHandler(Frames_CollectionChanged);
 
-            Filters = new List<ushort>();
+            Filters = new HashSet<ushort>();
 
             HighlightBrushes = new List<Brush>()
                             {
@@ -105,7 +106,7 @@ namespace CanLighthouse
             if (!FramesSyncronizationScheduled)
             {
                 FramesSyncronizationScheduled = true;
-                Dispatcher.BeginInvoke((Action)SyncronizeFramesOutput);
+                Dispatcher.BeginInvoke((Action)SyncronizeFramesOutput, System.Windows.Threading.DispatcherPriority.Background);
             }
         }
         private bool FramesSyncronizationScheduled = false;
@@ -133,10 +134,45 @@ namespace CanLighthouse
             if (beep)
                 System.Threading.Tasks.Task.Factory.StartNew(() => Console.Beep(1000, 50));
 
-            if (AutostrollMenuItem.IsChecked && ! LogGrid.Items.IsEmpty)
-                Dispatcher.BeginInvoke((Action<object>)LogGrid.ScrollIntoView,
-                    System.Windows.Threading.DispatcherPriority.Loaded,
-                    FramesCV.OfType<FrameModel>().Last());
+            if (AutostrollMenuItem.IsChecked && !LogGrid.Items.IsEmpty)
+                if (!FramesListScrollSceduled)
+                {
+                    FramesListScrollSceduled = true;
+
+                    Action StartScrollAction = () => Dispatcher.BeginInvoke((Action)ScrollToLastItem, System.Windows.Threading.DispatcherPriority.Background);
+                    Task tsk = new Task(StartScrollAction);
+                    var delay = TimeSpan.FromMilliseconds(100) - (DateTime.Now - LastFramesListScrollime);
+                    if (delay.Ticks > 0)
+                    {
+                        Action DelayAction = () => System.Threading.Thread.Sleep(delay);
+                        tsk = (new Task(DelayAction + StartScrollAction));
+                    }
+                    tsk.Start();
+
+                    //System.Threading.Tasks.Task.Factory.StartNew(
+                    //    (Action)(delegate()
+                    //    {
+                    //        System.Threading.Thread.Sleep(50);
+                    //        Dispatcher.BeginInvoke((Action)ScrollToLastItem,
+                    //            System.Windows.Threading.DispatcherPriority.Background);
+                    //    }));
+                }
+            
+            //if (AutostrollMenuItem.IsChecked && ! LogGrid.Items.IsEmpty)
+            //    Dispatcher.Invoke((Action<object>)LogGrid.ScrollIntoView,
+            //        System.Windows.Threading.DispatcherPriority.Background,
+            //        FramesCV.OfType<FrameModel>().Last());
+
+        }
+        private DateTime LastFramesListScrollime = DateTime.Now;
+        private bool FramesListScrollSceduled = false;
+        private void ScrollToLastItem()
+        {
+            FramesListScrollSceduled = false;
+            LastFramesListScrollime = DateTime.Now;
+            var xxx = FramesCV.OfType<FrameModel>().LastOrDefault();
+            if (xxx != null)
+                LogGrid.ScrollIntoView(xxx);
         }
 
         private void FiltersEdit_TextChanged(object sender, TextChangedEventArgs e)
@@ -154,8 +190,7 @@ namespace CanLighthouse
 
             if (!Filters.SequenceEqual(NewFilters))
             {
-                Filters.Clear();
-                Filters.AddRange(NewFilters);
+                Filters = new HashSet<ushort>(NewFilters);
                 if (Filters.Any()) FramesCV.Filter = FrameFilter;
                 else FramesCV.Filter = null;
             }

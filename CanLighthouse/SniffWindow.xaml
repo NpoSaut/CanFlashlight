@@ -68,11 +68,11 @@
                       SelectionChanged="LogGrid_SelectionChanged" Name="LogGrid">
                 <ListView.View>
                     <GridView>
-                        <GridViewColumn Header="Время" DisplayMemberBinding="{Binding RecieveTime, StringFormat='HH:mm:ss.fff'}" />
-                        <GridViewColumn Header="Порт" DisplayMemberBinding="{Binding PortName}" />
-                        <GridViewColumn Header="Дескр" DisplayMemberBinding="{Binding Descriptor, StringFormat=X4}" />
+                        <GridViewColumn Header="Время"  DisplayMemberBinding="{Binding RecieveTime, StringFormat='HH:mm:ss.fff'}" />
+                        <GridViewColumn Header="Порт"   DisplayMemberBinding="{Binding PortName}" />
+                        <GridViewColumn Header="Дескр"  DisplayMemberBinding="{Binding Descriptor, StringFormat=X4}" />
                         <GridViewColumn Header="Данные" DisplayMemberBinding="{Binding HexString}" />
-                        <GridViewColumn Header="Двоичные" DisplayMemberBinding="{Binding BinaryString}" />
+                        <!--<GridViewColumn Header="Двоичные" DisplayMemberBinding="{Binding BinaryString}" />-->
                     </GridView>
                 </ListView.View>
             </ListView>
