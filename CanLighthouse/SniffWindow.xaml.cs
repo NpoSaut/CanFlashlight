@@ -28,7 +28,7 @@ namespace CanLighthouse
     /// </summary>
     public partial class SniffWindow : Window
     {
-        private const int CutOffCount = 30000;
+        private const int CutOffCount = 3000;
         public ObjectiveCommons.Collections.LockableObservableCollection<FrameModel> Frames { get; private set; }
         public ListCollectionView FramesCV { get; set; }
         public HashSet<UInt16> Filters { get; private set; }
@@ -106,73 +106,60 @@ namespace CanLighthouse
             if (!FramesSyncronizationScheduled)
             {
                 FramesSyncronizationScheduled = true;
-                Dispatcher.BeginInvoke((Action)SyncronizeFramesOutput, System.Windows.Threading.DispatcherPriority.Background);
+
+                var xxx = FramesToInterfaceBuffer;
+                FramesToInterfaceBuffer = new Queue<FrameModel>();
+                Action UpdateAction =
+                    () =>
+                        Dispatcher.BeginInvoke((Action<Queue<FrameModel>>)SyncronizeFramesOutput,
+                            System.Windows.Threading.DispatcherPriority.Background,
+                            xxx);
+                Task.Factory.StartNew(UpdateAction);
             }
         }
         private bool FramesSyncronizationScheduled = false;
-        private ConcurrentQueue<FrameModel> FramesToInterfaceBuffer = new ConcurrentQueue<FrameModel>();
-        private void SyncronizeFramesOutput()
+        private Queue<FrameModel> FramesToInterfaceBuffer = new Queue<FrameModel>();
+        private void SyncronizeFramesOutput(Queue<FrameModel> Buffer)
         {
-            if (Frames.Count + FramesToInterfaceBuffer.Count > CutOffCount)
-                using (Frames.Locker())
-                {
-                    for (int i = 0; i < CutOffCount * 0.3; i++)
-                        Frames.RemoveAt(0);
-                }
+            int itemsToDelete = Frames.Count + Buffer.Count - CutOffCount;
+            for (int i = 0; i < itemsToDelete; i++)
+            {
+                if (Frames.Count > 0) Frames.RemoveAt(0);
+                else Buffer.Dequeue();
+            }
 
-            FrameModel f;
             bool beep = false;
             bool checkbeep = BeepMenuItem.IsChecked;
-            while (FramesToInterfaceBuffer.TryDequeue(out f))
+
+            using (Frames.Locker())
             {
-                Frames.Add(f);
-                if (checkbeep && !beep && FrameFilter(f))
-                    beep = true;
+                foreach (var f in Buffer)
+                {
+                    Frames.Add(f);
+                    if (checkbeep && !beep && FrameFilter(f))
+                        beep = true;
+                }
             }
-            FramesSyncronizationScheduled = false;
 
             if (beep)
-                System.Threading.Tasks.Task.Factory.StartNew(() => Console.Beep(1000, 50));
+                BeginBeep();
 
             if (AutostrollMenuItem.IsChecked && !LogGrid.Items.IsEmpty)
-                if (!FramesListScrollSceduled)
-                {
-                    FramesListScrollSceduled = true;
+                ScrollToLastItem();
 
-                    Action StartScrollAction = () => Dispatcher.BeginInvoke((Action)ScrollToLastItem, System.Windows.Threading.DispatcherPriority.Background);
-                    Task tsk = new Task(StartScrollAction);
-                    var delay = TimeSpan.FromMilliseconds(100) - (DateTime.Now - LastFramesListScrollime);
-                    if (delay.Ticks > 0)
-                    {
-                        Action DelayAction = () => System.Threading.Thread.Sleep(delay);
-                        tsk = (new Task(DelayAction + StartScrollAction));
-                    }
-                    tsk.Start();
-
-                    //System.Threading.Tasks.Task.Factory.StartNew(
-                    //    (Action)(delegate()
-                    //    {
-                    //        System.Threading.Thread.Sleep(50);
-                    //        Dispatcher.BeginInvoke((Action)ScrollToLastItem,
-                    //            System.Windows.Threading.DispatcherPriority.Background);
-                    //    }));
-                }
-            
-            //if (AutostrollMenuItem.IsChecked && ! LogGrid.Items.IsEmpty)
-            //    Dispatcher.Invoke((Action<object>)LogGrid.ScrollIntoView,
-            //        System.Windows.Threading.DispatcherPriority.Background,
-            //        FramesCV.OfType<FrameModel>().Last());
+            System.Threading.Thread.Sleep(30);
+            FramesSyncronizationScheduled = false;
 
         }
-        private DateTime LastFramesListScrollime = DateTime.Now;
-        private bool FramesListScrollSceduled = false;
         private void ScrollToLastItem()
         {
-            FramesListScrollSceduled = false;
-            LastFramesListScrollime = DateTime.Now;
-            var xxx = FramesCV.OfType<FrameModel>().LastOrDefault();
-            if (xxx != null)
-                LogGrid.ScrollIntoView(xxx);
+            var LastVisibleFrame = FramesCV.OfType<FrameModel>().LastOrDefault();
+            if (LastVisibleFrame != null)
+                LogGrid.ScrollIntoView(LastVisibleFrame);
+        }
+        private void BeginBeep()
+        {
+            System.Threading.Tasks.Task.Factory.StartNew(() => Console.Beep(1000, 50));
         }
 
         private void FiltersEdit_TextChanged(object sender, TextChangedEventArgs e)

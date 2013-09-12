@@ -65,7 +65,7 @@
 
             <ListView Grid.Row="1" Grid.Column="0" Margin="2"
                       ItemsSource="{Binding ElementName=sw, Path=FramesCV}"
-                      SelectionChanged="LogGrid_SelectionChanged" Name="LogGrid">
+                      SelectionChanged="LogGrid_SelectionChanged" Name="LogGrid" FontFamily="Lucida Console">
                 <ListView.View>
                     <GridView>
                         <GridViewColumn Header="Время"  DisplayMemberBinding="{Binding RecieveTime, StringFormat='HH:mm:ss.fff'}" />
