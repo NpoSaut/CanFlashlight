@@ -31,7 +31,7 @@
             </MenuItem>
             <MenuItem Header="Вид">
                 <MenuItem Name="AutostrollMenuItem" Header="Автопрокрутка" IsCheckable="True" InputGestureText="F6" IsChecked="{Binding ElementName=sw, Path=Autoscroll}" />
-                <MenuItem Name="BeepMenuItem" Header="Пикать при получении" IsCheckable="True" InputGestureText="F7"  IsChecked="{Binding ElementName=sw, Path=BeepOnFrame}" />
+                <MenuItem Name="BeepMenuItem" Header="Пикать при получении" IsCheckable="True" InputGestureText="F7"  IsChecked="{Binding ElementName=sw, Path=BeepOnFrames}" />
                 <Separator />
                 <MenuItem Command="local:Commands.Clear" InputGestureText="F10" />
             </MenuItem>
