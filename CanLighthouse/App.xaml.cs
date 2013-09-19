@@ -72,14 +72,14 @@ namespace CanLighthouse
                     if (e.NewItems != null)
                         foreach (var NewDev in e.NewItems.OfType<AppiDev>())
                         {
-                            foreach (var NewPort in NewDev.Ports.Values)
+                            foreach (var NewPort in NewDev.CanPorts.Values)
                                 Ports.Add(NewPort);
                             NewDev.Disconnected += AppiDev_Disconnected;
                         }
                     if (e.OldItems != null)
                         foreach (var RemovedDev in e.OldItems.OfType<AppiDev>())
                         {
-                            foreach (var RemovedPort in RemovedDev.Ports.Values)
+                            foreach (var RemovedPort in RemovedDev.CanPorts.Values)
                                 Ports.Remove(RemovedPort);
                             RemovedDev.Disconnected -= AppiDev_Disconnected;
                             RemovedDev.Dispose();

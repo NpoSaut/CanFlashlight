@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{4BC1C6C7-FBBB-4AFD-A53E-046356C5C60F}</ProjectGuid>
+    <ProjectGuid>{B7442A78-9535-4474-BE1F-33C6D119A313}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Tappi</RootNamespace>
-    <AssemblyName>Tappi</AssemblyName>
+    <RootNamespace>WirelessTerminal</RootNamespace>
+    <AssemblyName>WirelessTerminal</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <TargetFrameworkProfile>Client</TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
@@ -43,8 +43,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ConsoleEditor.cs" />
-    <Compile Include="FilterModel.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -56,10 +54,6 @@
     <ProjectReference Include="..\Can\AppiWorking\AppiWorking.csproj">
       <Project>{5A812723-E98B-4B82-AE7B-8E2747D8541F}</Project>
       <Name>AppiWorking</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Can\BlokFrames\BlokFrames.csproj">
-      <Project>{405B0F26-46EE-4D8C-9267-652F7D4C4AB0}</Project>
-      <Name>BlokFrames</Name>
     </ProjectReference>
     <ProjectReference Include="..\Can\Communications\Communications.csproj">
       <Project>{6C5B1ECA-5187-4F63-8CF1-C17DF50D0F65}</Project>

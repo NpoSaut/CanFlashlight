@@ -30,7 +30,7 @@ namespace Tappi
 
             using (var d = ds.OpenDevice(true))
             {
-                Ports = new List<CanPort>(d.Ports.Values);
+                Ports = new List<CanPort>(d.CanPorts.Values);
 
 
                 foreach (var p in Ports) RegisterPort(p);
